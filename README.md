@@ -68,6 +68,7 @@ GET /user/...             (Optional) User routes
 ✅ SHAP-based feature importance visualization
 ✅ Streamlined UI with TailwindCSS and React Router
 ✅ Secure CORS connection between frontend-backend
+✅ Predictions logged to `Backend/predictions.csv`
 
 🔐 Default Login (for testing)
 ```json
