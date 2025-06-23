@@ -1,10 +1,25 @@
 import { ArrowUpRight, AlertTriangle, UserCircle, Star } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Doughnut, Line } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend } from 'chart.js';
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 export default function Home() {
+  const [recentMeds, setRecentMeds] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/predict/history')
+      .then((res) => res.json())
+      .then((data) => {
+        const meds = data
+          .map((d) => d.DESCRIPTION_med)
+          .slice(-5)
+          .reverse();
+        setRecentMeds(meds);
+      })
+      .catch((err) => console.error(err));
+  }, []);
   const kpis = [
     {
       label: 'Total Fraud Cases',
@@ -98,6 +113,20 @@ export default function Home() {
             </li>
           ))}
         </ul>
+      </div>
+
+      {/* Recent Predictions */}
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-lg font-semibold mb-2">Recent Predictions</h2>
+        {recentMeds.length ? (
+          <ul className="list-disc list-inside space-y-1 text-sm">
+            {recentMeds.map((med, idx) => (
+              <li key={idx}>{med}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-gray-500">No predictions yet.</p>
+        )}
       </div>
 
       {/* Flagged Prescriptions Table */}

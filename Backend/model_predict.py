@@ -23,3 +23,13 @@ def predict(input_data: FraudInput):
         writer.writerow(record)
     return result
 
+
+@model_router.get("/history")
+def get_prediction_history():
+    """Return all stored predictions as a list of dicts."""
+    if not PRED_FILE.is_file():
+        return []
+    with open(PRED_FILE, "r", newline="") as f:
+        reader = csv.DictReader(f)
+        return list(reader)
+
