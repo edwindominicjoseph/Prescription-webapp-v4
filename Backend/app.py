@@ -14,6 +14,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def root():
+    return {"message": "Backend is running 🚀"}
+
+
 app.include_router(auth_router, prefix="/auth")
 app.include_router(model_router, prefix="/predict")
 app.include_router(user_router, prefix="/user")
