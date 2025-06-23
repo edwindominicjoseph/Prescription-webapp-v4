@@ -23,7 +23,7 @@ export default function Navbar() {
         {/* Logo + Brand */}
         <div className="flex items-center space-x-2">
           <img src="https://img.icons8.com/fluency/48/pill.png" alt="pill-icon" className="w-6 h-6" />
-          <h1 className="text-xl font-bold">Fraud Detector</h1>
+          <h1 className="text-xl font-bold">AI-PrescripSafe</h1>
         </div>
 
         {/* Desktop Nav */}
