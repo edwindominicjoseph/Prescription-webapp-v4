@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { ArrowUpRight, AlertTriangle, UserCircle, Star } from 'lucide-react';
 import { Doughnut, Line } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend } from 'chart.js';
@@ -5,34 +6,34 @@ import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, PointElement,
 ChartJS.register(ArcElement, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 export default function Home() {
-  const kpis = [
+  const [kpis, setKpis] = useState([
     {
       label: 'Total Fraud Cases',
-      value: 1234,
-      percent: 5,
+      value: 0,
+      percent: 0,
       data: {
         labels: ['Cases', 'Other'],
-        datasets: [{ data: [70, 30], backgroundColor: ['#f472b6', '#e5e7eb'], borderWidth: 0 }],
+        datasets: [{ data: [0, 100], backgroundColor: ['#f472b6', '#e5e7eb'], borderWidth: 0 }],
       },
     },
     {
       label: 'Monthly Fraud Increase',
-      value: 123,
-      percent: 2.5,
+      value: 0,
+      percent: 0,
       data: {
         labels: ['Increase', 'Other'],
-        datasets: [{ data: [40, 60], backgroundColor: ['#a78bfa', '#e5e7eb'], borderWidth: 0 }],
+        datasets: [{ data: [0, 100], backgroundColor: ['#a78bfa', '#e5e7eb'], borderWidth: 0 }],
       },
     },
     {
       label: 'Fraud Detection Rate',
-      value: '87%',
-      percent: 1.2,
+      value: '0%',
+      percent: 0,
       line: {
         labels: ['W1', 'W2', 'W3', 'W4', 'W5'],
         datasets: [
           {
-            data: [70, 75, 72, 80, 87],
+            data: [0, 0, 0, 0, 0],
             borderColor: '#34d399',
             backgroundColor: 'rgba(52,211,153,0.2)',
             tension: 0.4,
@@ -42,7 +43,7 @@ export default function Home() {
         ],
       },
     },
-  ];
+  ]);
 
   const medsData = {
     labels: ['Medicine A', 'Medicine B', 'Medicine C', 'Medicine D'],
@@ -55,11 +56,38 @@ export default function Home() {
     ],
   };
 
-  const flagged = [
-    { id: 'RX001', patient: 'John Doe', status: 'Flagged', risk: 5, doctor: 'Dr. Smith' },
-    { id: 'RX002', patient: 'Jane Roe', status: 'Flagged', risk: 4, doctor: 'Dr. Lee' },
-    { id: 'RX003', patient: 'Bob Ray', status: 'Cleared', risk: 2, doctor: 'Dr. Adams' },
-  ];
+  const [flagged, setFlagged] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/predict/history')
+      .then((res) => res.json())
+      .then((data) => {
+        setFlagged(
+          data.map((r, i) => ({
+            id: `RX${String(i + 1).padStart(3, '0')}`,
+            patient: r.PATIENT_med,
+            status: r.fraud === 'True' ? 'Flagged' : 'Cleared',
+            risk: Math.min(5, Math.round(Number(r.risk_score) / 20)),
+            doctor: r.PROVIDER,
+          }))
+        );
+
+        const fraudCount = data.filter((r) => r.fraud === 'True' || r.fraud === true).length;
+        const month = new Date().getMonth();
+        const monthlyFraud = data.filter(
+          (r) => new Date(r.timestamp).getMonth() === month && (r.fraud === 'True' || r.fraud === true)
+        ).length;
+        const total = data.length;
+        const detection = total ? Math.round((fraudCount / total) * 100) : 0;
+
+        setKpis((prev) => [
+          { ...prev[0], value: fraudCount },
+          { ...prev[1], value: monthlyFraud },
+          { ...prev[2], value: `${detection}%` },
+        ]);
+      })
+      .catch((err) => console.error(err));
+  }, []);
 
   return (
     <div className="p-6 space-y-8">
