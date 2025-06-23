@@ -11,6 +11,7 @@ export default function Navbar({ onNew }) {
       : 'text-white/80 hover:text-white';
 
   return (
+
     <nav className="bg-black text-white sticky top-0 z-50 w-full">
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2 text-sm font-semibold">
@@ -48,6 +49,7 @@ export default function Navbar({ onNew }) {
             <Settings className="w-5 h-5" />
             <span className="hidden md:inline">Settings</span>
           </Link>
+
           <button
             onClick={() => navigate('/login')}
             className="flex items-center gap-1 text-white/80 hover:text-white"
