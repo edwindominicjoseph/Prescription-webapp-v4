@@ -3,6 +3,7 @@ import { Home, PlusCircle, Flag, User, Settings, LogOut, Search } from 'lucide-r
 
 export default function Navbar() {
   return (
+
     <nav className="bg-black text-white w-full">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3 space-x-4">
         <div className="flex items-center space-x-2 whitespace-nowrap">
@@ -44,6 +45,7 @@ export default function Navbar() {
             <LogOut className="w-5 h-5" />
             <span className="hidden sm:inline">Logout</span>
           </Link>
+
         </div>
       </div>
     </nav>
