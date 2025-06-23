@@ -117,14 +117,19 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="space-y-8">
+      <section className="bg-gradient-to-r from-gray-900 to-black text-white rounded-lg p-6 shadow mb-8">
+        <h2 className="text-2xl font-bold">Dashboard Overview</h2>
+        <p className="text-sm text-white/80">Latest fraud prediction statistics</p>
+      </section>
+
       {/* Top KPI Cards */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid gap-6 md:grid-cols-3">
         {kpis.map((kpi) => (
-          <div key={kpi.label} className="bg-white p-4 rounded-lg shadow flex items-center justify-between">
+          <div key={kpi.label} className="bg-gray-800 p-4 rounded-lg shadow flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">{kpi.label}</p>
-              <p className="text-2xl font-semibold text-gray-800">{kpi.value}</p>
+              <p className="text-sm text-gray-400">{kpi.label}</p>
+              <p className="text-2xl font-semibold text-white">{kpi.value}</p>
               <p className="flex items-center text-sm text-green-600">
                 <ArrowUpRight className="w-4 h-4" /> {kpi.percent}%
               </p>
@@ -141,7 +146,7 @@ export default function Home() {
       </div>
 
       {/* Top Medicines */}
-      <div className="bg-white p-6 rounded-lg shadow grid md:grid-cols-2 gap-6 items-center">
+      <div className="bg-gray-800 p-6 rounded-lg shadow grid md:grid-cols-2 gap-6 items-center">
         <div className="w-full max-w-sm mx-auto">
           <Doughnut data={medsData} options={{ plugins: { legend: { display: false } }, cutout: '60%' }} />
         </div>
@@ -156,10 +161,10 @@ export default function Home() {
       </div>
 
       {/* Flagged Prescriptions Table */}
-      <div className="bg-white p-6 rounded-lg shadow overflow-x-auto">
+      <div className="bg-gray-800 p-6 rounded-lg shadow overflow-x-auto">
         <table className="min-w-full text-sm">
           <thead>
-            <tr className="text-left text-gray-600">
+            <tr className="text-left text-gray-300">
               <th className="py-2">Prescription ID</th>
               <th className="py-2">Patient</th>
               <th className="py-2">Status</th>
@@ -188,10 +193,10 @@ export default function Home() {
                   {row.status === 'Flagged' && <AlertTriangle className="text-red-600 w-5 h-5" />}
                 </td>
                 <td className="py-2 flex items-center gap-1">
-                  <UserCircle className="w-5 h-5 text-gray-500" /> {row.doctor}
+                  <UserCircle className="w-5 h-5 text-gray-400" /> {row.doctor}
                 </td>
                 <td className="py-2">
-                  <button className="bg-violet-600 text-white px-3 py-1 rounded-md text-xs hover:bg-violet-700">
+                  <button className="bg-gray-700 text-white px-3 py-1 rounded-md text-xs hover:bg-gray-600">
                     Review
                   </button>
                 </td>
