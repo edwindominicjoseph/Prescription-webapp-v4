@@ -55,7 +55,7 @@ export default function NewPrescription() {
   };
 
   return (
-    <div className="px-4 py-8 bg-gray-50 min-h-screen">
+    <div className="px-4 py-8 bg-gradient-to-br from-indigo-100 to-violet-200 min-h-screen">
       <form onSubmit={handleSubmit} className="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow-md">
         <div className="grid md:grid-cols-2 gap-6">
 

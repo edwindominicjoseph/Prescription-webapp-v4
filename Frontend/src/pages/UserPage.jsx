@@ -13,7 +13,7 @@ export default function UserPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-violet-200 px-4 py-8">
       <div className="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md">
         <div className="grid md:grid-cols-3 gap-6">
 

@@ -117,9 +117,14 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="space-y-8">
+      <section className="bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-lg p-6 shadow mb-8">
+        <h2 className="text-2xl font-bold">Dashboard Overview</h2>
+        <p className="text-sm text-white/80">Latest fraud prediction statistics</p>
+      </section>
+
       {/* Top KPI Cards */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid gap-6 md:grid-cols-3">
         {kpis.map((kpi) => (
           <div key={kpi.label} className="bg-white p-4 rounded-lg shadow flex items-center justify-between">
             <div>
