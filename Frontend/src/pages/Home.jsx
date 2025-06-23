@@ -45,16 +45,16 @@ export default function Home() {
     },
   ]);
 
-  const medsData = {
-    labels: ['Medicine A', 'Medicine B', 'Medicine C', 'Medicine D'],
+  const [medsData, setMedsData] = useState({
+    labels: [],
     datasets: [
       {
-        data: [40, 25, 20, 15],
-        backgroundColor: ['#fbbf24', '#60a5fa', '#34d399', '#f472b6'],
+        data: [],
+        backgroundColor: ['#fbbf24', '#60a5fa', '#34d399', '#f472b6', '#a78bfa'],
         borderWidth: 0,
       },
     ],
-  };
+  });
 
   const [flagged, setFlagged] = useState([]);
 
@@ -85,6 +85,33 @@ export default function Home() {
           { ...prev[1], value: monthlyFraud },
           { ...prev[2], value: `${detection}%` },
         ]);
+
+        const medCounts = {};
+        data.forEach((r) => {
+          const name = r.DESCRIPTION_med;
+          if (name) {
+            medCounts[name] = (medCounts[name] || 0) + 1;
+          }
+        });
+        const topMeds = Object.entries(medCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 4);
+        const labels = topMeds.map(([n]) => n);
+        const counts = topMeds.map(([, c]) => c);
+        setMedsData((prev) => ({
+          ...prev,
+          labels,
+          datasets: [
+            {
+              ...prev.datasets[0],
+              data: counts,
+              backgroundColor: prev.datasets[0].backgroundColor.slice(
+                0,
+                labels.length
+              ),
+            },
+          ],
+        }));
       })
       .catch((err) => console.error(err));
   }, []);
