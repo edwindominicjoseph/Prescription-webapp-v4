@@ -1,66 +1,53 @@
-import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Home, PlusCircle, Flag, User, Settings, LogOut, Search } from 'lucide-react';
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    // 🔐 Clear tokens or session here if needed
-    navigate('/login'); // Redirect to login page
-  };
-
-  const linkClass = (path) =>
-    location.pathname === path
-      ? 'text-white font-semibold'
-      : 'text-white/80 hover:text-white';
-
   return (
-    <nav className="bg-gradient-to-r from-gray-900 to-black sticky top-0 z-50 w-full text-white shadow-md">
-      <div className="w-full px-4 py-3 flex justify-between items-center">
-        {/* Logo + Brand */}
-        <div className="flex items-center space-x-2">
-          <img src="https://img.icons8.com/fluency/48/pill.png" alt="pill-icon" className="w-6 h-6" />
-          <h1 className="text-xl font-bold">AI-PrescripSafe</h1>
-        </div>
 
-        {/* Desktop Nav */}
-        <div className="hidden md:flex space-x-6 items-center">
-          <Link to="/" className={linkClass('/')}>Home</Link>
-          <Link to="/new" className={linkClass('/new')}>New</Link>
-          <Link to="/flagged" className={linkClass('/flagged')}>Flagged</Link>
-          <Link to="/profile" className={linkClass('/profile')}>Profile</Link>
-          <Link to="/settings" className={linkClass('/settings')}>Settings</Link>
-          <button onClick={handleLogout} className="text-gray-300 hover:text-red-500">Logout</button>
+    <nav className="bg-black text-white w-full">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3 space-x-4">
+        <div className="flex items-center space-x-2 whitespace-nowrap">
+          <span className="text-pink-500">💊</span>
+          <span className="font-bold">AI-PrescripSafe</span>
         </div>
+        <div className="flex-1 max-w-md hidden sm:block">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search medications or news..."
+              className="w-full bg-gray-800 rounded text-sm pl-8 pr-3 py-2 placeholder-gray-400 focus:outline-none"
+            />
+          </div>
+        </div>
+        <div className="flex items-center space-x-4 text-sm">
+          <Link to="/" className="flex items-center gap-1 hover:text-pink-400 transition">
+            <Home className="w-5 h-5" />
+            <span className="hidden sm:inline">Home</span>
+          </Link>
+          <Link to="/new" className="flex items-center gap-1 hover:text-pink-400 transition">
+            <PlusCircle className="w-5 h-5" />
+            <span className="hidden sm:inline">New</span>
+          </Link>
+          <Link to="/flagged" className="flex items-center gap-1 hover:text-pink-400 transition">
+            <Flag className="w-5 h-5" />
+            <span className="hidden sm:inline">Flagged</span>
+          </Link>
+          <Link to="/profile" className="flex items-center gap-1 hover:text-pink-400 transition">
+            <User className="w-5 h-5" />
+            <span className="hidden sm:inline">Profile</span>
+          </Link>
+          <Link to="/settings" className="flex items-center gap-1 hover:text-pink-400 transition">
+            <Settings className="w-5 h-5" />
+            <span className="hidden sm:inline">Settings</span>
+          </Link>
+          <Link to="/logout" className="flex items-center gap-1 hover:text-pink-400 transition">
+            <LogOut className="w-5 h-5" />
+            <span className="hidden sm:inline">Logout</span>
+          </Link>
 
-        {/* Mobile Menu Button */}
-        <button
-          className="md:hidden text-white/80"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        </div>
       </div>
-
-      {/* Mobile Dropdown */}
-      {isOpen && (
-        <div className="md:hidden px-4 pb-4 space-y-2 bg-gradient-to-r from-gray-900 to-black text-white">
-          <Link to="/" className={linkClass('/')}>Home</Link>
-          <Link to="/new" className={linkClass('/new')}>New</Link>
-          <Link to="/flagged" className={linkClass('/flagged')}>Flagged</Link>
-          <Link to="/profile" className={linkClass('/profile')}>Profile</Link>
-          <Link to="/settings" className={linkClass('/settings')}>Settings</Link>
-          <button
-            onClick={handleLogout}
-            className="block text-left w-full text-white/80 hover:text-white"
-          >
-            Logout
-          </button>
-        </div>
-      )}
     </nav>
   );
 }
