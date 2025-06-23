@@ -55,24 +55,24 @@ export default function NewPrescription() {
   };
 
   return (
-    <div className="px-4 py-8 bg-gradient-to-br from-gray-900 to-black min-h-screen">
-      <form onSubmit={handleSubmit} className="max-w-5xl mx-auto bg-gray-800 p-6 rounded-lg shadow-md">
+    <div className="px-4 py-8 bg-gradient-to-br from-indigo-100 to-violet-200 min-h-screen">
+      <form onSubmit={handleSubmit} className="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow-md">
         <div className="grid md:grid-cols-2 gap-6">
 
           {/* Left column */}
           <div className="space-y-4">
             <div>
-              <label className="block font-medium text-gray-300">Patient ID</label>
+              <label className="block font-medium text-gray-700">Patient ID</label>
               <input name="patient" type="text" defaultValue="demo_patient_01" className="w-full input-style" />
             </div>
 
             <div>
-              <label className="block font-medium text-gray-300">Medication Name</label>
+              <label className="block font-medium text-gray-700">Medication Name</label>
               <input name="medication" type="text" defaultValue="Oxycodone Hydrochloride 10 MG" className="w-full input-style" />
             </div>
 
             <div>
-              <label className="block font-medium text-gray-300">Encounter Type</label>
+              <label className="block font-medium text-gray-700">Encounter Type</label>
               <select name="encounter" className="w-full input-style">
                 <option value="inpatient">inpatient</option>
                 <option value="outpatient">outpatient</option>
@@ -81,7 +81,7 @@ export default function NewPrescription() {
             </div>
 
             <div>
-              <label className="block font-medium text-gray-300">Dispenses</label>
+              <label className="block font-medium text-gray-700">Dispenses</label>
               <div className="flex items-center gap-2">
                 <button type="button" onClick={() => handleDispenseChange(-1)} className="btn-gray">−</button>
                 <input name="dispenses" type="number" readOnly value={dispenses} className="input-style text-center w-20" />
@@ -90,7 +90,7 @@ export default function NewPrescription() {
             </div>
 
             <div>
-              <label className="block font-medium text-gray-300">Base Cost (€)</label>
+              <label className="block font-medium text-gray-700">Base Cost (€)</label>
               <div className="flex items-center gap-2">
                 <button type="button" onClick={() => handleCostChange(baseCost - 1)} className="btn-gray">−</button>
                 <input
@@ -105,27 +105,27 @@ export default function NewPrescription() {
             </div>
 
             <div>
-              <label className="block font-medium text-gray-300">Total Cost (€)</label>
-              <input name="totalcost" type="text" readOnly value={totalCost} className="w-full input-style bg-gray-700" />
+              <label className="block font-medium text-gray-700">Total Cost (€)</label>
+              <input name="totalcost" type="text" readOnly value={totalCost} className="w-full input-style bg-gray-100" />
             </div>
           </div>
 
           {/* Right column */}
           <div className="space-y-4">
             <div>
-              <label className="block font-medium text-gray-300">Age: {age}</label>
+              <label className="block font-medium text-gray-700">Age: {age}</label>
               <input
                 type="range"
                 min={0}
                 max={100}
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
-                className="w-full accent-gray-500"
+                className="w-full accent-indigo-500"
               />
             </div>
 
             <div>
-              <label className="block font-medium text-gray-300">Gender</label>
+              <label className="block font-medium text-gray-700">Gender</label>
               <select name="gender" className="w-full input-style">
                 <option>M</option>
                 <option>F</option>
@@ -134,7 +134,7 @@ export default function NewPrescription() {
             </div>
 
             <div>
-              <label className="block font-medium text-gray-300">Marital Status</label>
+              <label className="block font-medium text-gray-700">Marital Status</label>
               <select name="marital" className="w-full input-style">
                 <option>M</option>
                 <option>S</option>
@@ -142,29 +142,29 @@ export default function NewPrescription() {
             </div>
 
             <div>
-              <label className="block font-medium text-gray-300">State</label>
+              <label className="block font-medium text-gray-700">State</label>
               <input name="state" type="text" defaultValue="Massachusetts" className="w-full input-style" />
             </div>
 
             <div>
-              <label className="block font-medium text-gray-300">Provider</label>
+              <label className="block font-medium text-gray-700">Provider</label>
               <input name="provider" type="text" defaultValue="Dr.ABC" className="w-full input-style" />
             </div>
 
             <div>
-              <label className="block font-medium text-gray-300">Organization</label>
+              <label className="block font-medium text-gray-700">Organization</label>
               <input name="organization" type="text" defaultValue="City Health" className="w-full input-style" />
             </div>
           </div>
         </div>
 
         <div className="pt-6">
-          <button type="submit" className="w-full bg-gray-700 text-white py-2 rounded-md hover:bg-gray-600">
+          <button type="submit" className="w-full bg-violet-600 text-white py-2 rounded-md hover:bg-violet-700">
             ✓ AI Fraud Check
           </button>
         </div>
         {result && (
-          <div className="mt-4 p-4 bg-gray-700 rounded">
+          <div className="mt-4 p-4 bg-gray-100 rounded">
             <p className="font-medium">Risk Score: {result.risk_score}</p>
             <p>Medication Risk: {result.medication_risk}</p>
             <p>Fraudulent: {result.fraud ? 'Yes' : 'No'}</p>
