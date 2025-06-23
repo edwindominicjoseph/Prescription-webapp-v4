@@ -2,6 +2,8 @@
 
 import os
 import random
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import shap
@@ -18,7 +20,17 @@ from sklearn.preprocessing import LabelEncoder
 app = FastAPI()
 
 # --- Load Dataset ---
-DATA_PATH = "C:/Fruad detection_1st_prototype/data/merged_Fullcover.csv"
+env_data_path = os.environ.get("DATA_PATH")
+if env_data_path:
+    DATA_PATH = Path(env_data_path)
+else:
+    DATA_PATH = Path(__file__).parent / "data" / "merged_Fullcover.csv"
+
+if not DATA_PATH.is_file():
+    raise FileNotFoundError(
+        f"Data file not found at {DATA_PATH}. Set DATA_PATH environment variable to override."
+    )
+
 df3 = pd.read_csv(DATA_PATH)
 
 # --- Risk Lists ---
