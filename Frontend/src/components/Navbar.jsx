@@ -18,7 +18,7 @@ export default function Navbar() {
       : 'text-white/80 hover:text-white';
 
   return (
-    <nav className="bg-gradient-to-r from-blue-600 to-indigo-600 sticky top-0 z-50 w-full text-white shadow-md">
+    <nav className="bg-gradient-to-r from-gray-900 to-black sticky top-0 z-50 w-full text-white shadow-md">
       <div className="w-full px-4 py-3 flex justify-between items-center">
         {/* Logo + Brand */}
         <div className="flex items-center space-x-2">
@@ -33,7 +33,7 @@ export default function Navbar() {
           <Link to="/flagged" className={linkClass('/flagged')}>Flagged</Link>
           <Link to="/profile" className={linkClass('/profile')}>Profile</Link>
           <Link to="/settings" className={linkClass('/settings')}>Settings</Link>
-          <button onClick={handleLogout} className="text-gray-700 hover:text-red-600">Logout</button>
+          <button onClick={handleLogout} className="text-gray-300 hover:text-red-500">Logout</button>
         </div>
 
         {/* Mobile Menu Button */}
@@ -47,7 +47,7 @@ export default function Navbar() {
 
       {/* Mobile Dropdown */}
       {isOpen && (
-        <div className="md:hidden px-4 pb-4 space-y-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+        <div className="md:hidden px-4 pb-4 space-y-2 bg-gradient-to-r from-gray-900 to-black text-white">
           <Link to="/" className={linkClass('/')}>Home</Link>
           <Link to="/new" className={linkClass('/new')}>New</Link>
           <Link to="/flagged" className={linkClass('/flagged')}>Flagged</Link>
