@@ -10,6 +10,7 @@ import shap
 import matplotlib.pyplot as plt
 
 from fastapi import FastAPI
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sklearn.ensemble import IsolationForest
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -178,11 +179,18 @@ def predict_fraud(input: FraudInput):
         shap_values = explainer_general(entry_df[feature_cols])
         shap_input = entry_df[feature_cols]
 
-    return {
-        "fraud": score < 0,
-        "risk_score": norm_score,
+    shap_features = {
+        k: (float(v) if isinstance(v, (np.floating, np.integer)) else v)
+        for k, v in shap_input.to_dict(orient="records")[0].items()
+    }
+    shap_values_list = [float(v) for v in shap_values.values[0].tolist()]
+
+    result = {
+        "fraud": bool(score < 0),
+        "risk_score": int(norm_score),
         "medication_risk": risk_category,
         "used_model": model_type,
-        "shap_features": shap_input.to_dict(orient="records")[0],
-        "shap_values": shap_values.values[0].tolist()
+        "shap_features": shap_features,
+        "shap_values": shap_values_list,
     }
+    return jsonable_encoder(result)
