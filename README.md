@@ -7,37 +7,7 @@ An AI-powered end-to-end platform for detecting prescription fraud using ML & SH
 
 🔐 Auth, risk scoring, SHAP-based insights, and UI dashboards
 
-🗂️ Project Structure
-Prescription-webapp-v4/
-├── Backend/
-│   ├── app.py                  # Main FastAPI entrypoint
-│   ├── auth.py                 # Login logic
-│   ├── ml_model_api.py         # ML model code
-│   ├── data/
-│   │   └── merged_Fullcover.csv
-│   └── requirements.txt
-├── Frontend/
-│   ├── public/
-│   ├── src/
-│   │   ├── assets/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   │   ├── Home.jsx
-│   │   │   ├── NewPrescription.jsx
-│   │   │   ├── FlaggedPrescriptions.jsx
-│   │   │   ├── Settings.jsx
-│   │   │   ├── UserPage.jsx
-│   │   │   └── login.jsx
-│   │   ├── App.jsx
-│   │   ├── router.jsx          # Route config
-│   │   ├── main.jsx            # App entrypoint
-│   │   ├── App.css
-│   │   └── index.css
-│   ├── vite.config.js
-│   ├── tailwind.config.js
-│   └── package.json
-├── README.md
-└── .gitignore
+
 
 ⚙️ How to Run
 1. 🔌 Backend (FastAPI)
