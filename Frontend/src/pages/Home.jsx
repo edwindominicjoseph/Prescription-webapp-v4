@@ -117,7 +117,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fadeIn">
       <section className="bg-gradient-to-r from-gray-900 to-black text-white rounded-lg p-6 shadow mb-8">
         <h2 className="text-2xl font-bold">Dashboard Overview</h2>
         <p className="text-sm text-white/80">Latest fraud prediction statistics</p>
@@ -126,7 +126,7 @@ export default function Home() {
       {/* Top KPI Cards */}
       <div className="grid gap-6 md:grid-cols-3">
         {kpis.map((kpi) => (
-          <div key={kpi.label} className="bg-gray-800 p-4 rounded-lg shadow flex items-center justify-between">
+          <div key={kpi.label} className="bg-gray-800 p-4 rounded-lg shadow flex items-center justify-between transition-transform hover:scale-105">
             <div>
               <p className="text-sm text-gray-400">{kpi.label}</p>
               <p className="text-2xl font-semibold text-white">{kpi.value}</p>
@@ -176,7 +176,7 @@ export default function Home() {
           </thead>
           <tbody>
             {flagged.map((row) => (
-              <tr key={row.id} className="border-t">
+              <tr key={row.id} className="border-t hover:bg-gray-700 transition-colors">
                 <td className="py-2 font-medium">{row.id}</td>
                 <td className="py-2">{row.patient}</td>
                 <td className="py-2">
