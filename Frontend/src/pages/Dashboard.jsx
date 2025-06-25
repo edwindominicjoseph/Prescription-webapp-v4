@@ -25,6 +25,7 @@ ChartJS.register(
 export default function Dashboard() {
   const [rows, setRows] = useState([]);
   const [fraudPct, setFraudPct] = useState(0);
+  const [fraudCount, setFraudCount] = useState(0);
   const [total, setTotal] = useState(0);
   const [medChart, setMedChart] = useState({
     labels: [],
@@ -68,6 +69,7 @@ export default function Dashboard() {
           (d) => d.fraud === 'True' || d.fraud === true
         ).length;
         setTotal(totalRecords);
+        setFraudCount(fraudRecords);
         setFraudPct(
           totalRecords ? Math.round((fraudRecords / totalRecords) * 100) : 0
         );
@@ -157,7 +159,7 @@ export default function Dashboard() {
                 <p className="text-sm font-semibold" style={{ color: '#2F5597' }}>
                   Total Fraud Cases
                 </p>
-                <p className="text-2xl font-bold text-red-500">{fraudPct}</p>
+                <p className="text-2xl font-bold text-red-500">{fraudCount}</p>
               </div>
               <div className="w-20 h-20">
                 <Doughnut data={donutFraudData} options={{ plugins: { legend: { display: false } }, cutout: '70%' }} />
