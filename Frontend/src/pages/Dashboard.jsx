@@ -10,7 +10,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Star } from 'lucide-react';
+import { Star, AlertTriangle } from 'lucide-react';
 
 ChartJS.register(
   ArcElement,
@@ -25,6 +25,7 @@ ChartJS.register(
 export default function Dashboard() {
   const [rows, setRows] = useState([]);
   const [fraudPct, setFraudPct] = useState(0);
+  const [fraudCount, setFraudCount] = useState(0);
   const [total, setTotal] = useState(0);
   const [medChart, setMedChart] = useState({
     labels: [],
@@ -51,22 +52,31 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    fetch('/api/predictions_out')
+    fetch('http://localhost:8000/predict/history')
       .then((res) => res.json())
       .then((data) => {
-        setRows(data);
+        setRows(
+          data.map((r, i) => ({
+            id: `RX${String(i + 1).padStart(3, '0')}`,
+            patient: r.PATIENT_med,
+            status: r.fraud === 'True' || r.fraud === true ? 'Flagged' : 'Cleared',
+            risk: Math.min(5, Math.round(Number(r.risk_score) / 20)),
+            doctor: r.PROVIDER,
+          }))
+        );
         const totalRecords = data.length;
-        const fraudRecords = data.filter((d) =>
-          String(d.Status).toLowerCase().includes('fraud')
+        const fraudRecords = data.filter(
+          (d) => d.fraud === 'True' || d.fraud === true
         ).length;
         setTotal(totalRecords);
+        setFraudCount(fraudRecords);
         setFraudPct(
           totalRecords ? Math.round((fraudRecords / totalRecords) * 100) : 0
         );
 
         const medCounts = {};
         data.forEach((d) => {
-          const med = d.Medication_Name;
+          const med = d.DESCRIPTION_med;
           if (med) {
             medCounts[med] = (medCounts[med] || 0) + 1;
           }
@@ -92,12 +102,12 @@ export default function Dashboard() {
         }));
 
         const sortedRows = [...data]
-          .sort((a, b) => new Date(a.Timestamp) - new Date(b.Timestamp))
+          .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
           .slice(-20);
         setTrendChart((prev) => ({
           ...prev,
           labels: sortedRows.map((r) =>
-            new Date(r.Timestamp).toLocaleTimeString([], {
+            new Date(r.timestamp).toLocaleTimeString([], {
               hour: '2-digit',
               minute: '2-digit',
             })
@@ -105,7 +115,7 @@ export default function Dashboard() {
           datasets: [
             {
               ...prev.datasets[0],
-              data: sortedRows.map((r) => Number(r.Risk_Score)),
+              data: sortedRows.map((r) => Number(r.risk_score)),
             },
           ],
         }));
@@ -140,7 +150,7 @@ export default function Dashboard() {
       >
         AI-Powered Prescription Fraud Detection Dashboard
       </h1>
-      <div className="md:grid md:grid-cols-[1fr_320px] gap-6">
+      <div className="md:grid md:grid-cols-[55%_45%] gap-6">
         <div className="space-y-6">
           {/* Row 1 */}
           <div className="grid sm:grid-cols-3 gap-4">
@@ -149,7 +159,7 @@ export default function Dashboard() {
                 <p className="text-sm font-semibold" style={{ color: '#2F5597' }}>
                   Total Fraud Cases
                 </p>
-                <p className="text-2xl font-bold text-red-500">{fraudPct}</p>
+                <p className="text-2xl font-bold text-red-500">{fraudCount}</p>
               </div>
               <div className="w-20 h-20">
                 <Doughnut data={donutFraudData} options={{ plugins: { legend: { display: false } }, cutout: '70%' }} />
@@ -228,55 +238,39 @@ export default function Dashboard() {
             <table className="min-w-full text-sm">
               <thead className="text-left text-gray-300">
                 <tr>
-                  <th className="py-2">PATIENT_ID</th>
+                  <th className="py-2">Prescription ID</th>
+                  <th className="py-2">Patient</th>
                   <th className="py-2">Status</th>
-                  <th className="py-2">Fraud_Risk</th>
-                  <th className="py-2">Flag_Severity</th>
+                  <th className="py-2">Fraud Risk</th>
+                  <th className="py-2">Flag</th>
                   <th className="py-2">Doctor</th>
                   <th className="py-2" />
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.PATIENT_ID} className="border-t">
-                    <td className="py-2 font-medium">{row.PATIENT_ID}</td>
+                  <tr key={row.id} className="border-t">
+                    <td className="py-2 font-medium">{row.id}</td>
+                    <td className="py-2">{row.patient}</td>
                     <td className="py-2">
-                      <span
-                        className={
-                          String(row.Status).toLowerCase().includes('fraud')
-                            ? 'text-red-500'
-                            : 'text-green-500'
-                        }
-                      >
-                        {row.Status}
+                      <span className={row.status === 'Flagged' ? 'text-red-500' : 'text-green-500'}>
+                        {row.status}
                       </span>
                     </td>
                     <td className="py-2">
                       {Array.from({ length: 5 }).map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-4 h-4 inline ${
-                            i < Math.round(Number(row.Risk_Score) / 20)
-                              ? 'text-yellow-400'
-                              : 'text-gray-400'
-                          }`}
+                          className={`w-4 h-4 inline ${i < row.risk ? 'text-yellow-400' : 'text-gray-400'}`}
                         />
                       ))}
                     </td>
                     <td className="py-2">
-                      <span
-                        className={`px-2 py-1 rounded text-white ${
-                          row.Severity === 'High'
-                            ? 'bg-red-600'
-                            : row.Severity === 'Med'
-                            ? 'bg-yellow-500'
-                            : 'bg-green-600'
-                        }`}
-                      >
-                        {row.Severity}
-                      </span>
+                      {row.status === 'Flagged' && (
+                        <AlertTriangle className="text-red-600 w-5 h-5" />
+                      )}
                     </td>
-                    <td className="py-2">{row.Doctor}</td>
+                    <td className="py-2">{row.doctor}</td>
                     <td className="py-2">
                       <button className="bg-blue-600 text-white px-3 py-1 rounded-md text-xs hover:bg-blue-500">
                         Review
