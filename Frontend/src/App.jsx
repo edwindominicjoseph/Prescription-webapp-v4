@@ -5,9 +5,9 @@ import AppRouter from './router';
 
 export default function App() {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100  text-gray-800 font-sans antialiased w-full">
+    <div className="flex flex-col min-h-screen text-gray-200 w-full">
       <Navbar />
-      <main className="flex-grow">
+      <main className="flex-grow max-w-7xl mx-auto px-4 py-6 w-full">
         <AppRouter />
       </main>
       <Footer />

@@ -1,5 +1,5 @@
-import { ArrowUpRight, AlertTriangle, UserCircle, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { ArrowUpRight, AlertTriangle, UserCircle, Star } from 'lucide-react';
 import { Doughnut, Line } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend } from 'chart.js';
 
@@ -20,34 +20,34 @@ export default function Home() {
       })
       .catch((err) => console.error(err));
   }, []);
-  const kpis = [
+  const [kpis, setKpis] = useState([
     {
       label: 'Total Fraud Cases',
-      value: 1234,
-      percent: 5,
+      value: 0,
+      percent: 0,
       data: {
         labels: ['Cases', 'Other'],
-        datasets: [{ data: [70, 30], backgroundColor: ['#f472b6', '#e5e7eb'], borderWidth: 0 }],
+        datasets: [{ data: [0, 100], backgroundColor: ['#f472b6', '#e5e7eb'], borderWidth: 0 }],
       },
     },
     {
       label: 'Monthly Fraud Increase',
-      value: 123,
-      percent: 2.5,
+      value: 0,
+      percent: 0,
       data: {
         labels: ['Increase', 'Other'],
-        datasets: [{ data: [40, 60], backgroundColor: ['#a78bfa', '#e5e7eb'], borderWidth: 0 }],
+        datasets: [{ data: [0, 100], backgroundColor: ['#a78bfa', '#e5e7eb'], borderWidth: 0 }],
       },
     },
     {
       label: 'Fraud Detection Rate',
-      value: '87%',
-      percent: 1.2,
+      value: '0%',
+      percent: 0,
       line: {
         labels: ['W1', 'W2', 'W3', 'W4', 'W5'],
         datasets: [
           {
-            data: [70, 75, 72, 80, 87],
+            data: [0, 0, 0, 0, 0],
             borderColor: '#34d399',
             backgroundColor: 'rgba(52,211,153,0.2)',
             tension: 0.4,
@@ -57,34 +57,93 @@ export default function Home() {
         ],
       },
     },
-  ];
+  ]);
 
-  const medsData = {
-    labels: ['Medicine A', 'Medicine B', 'Medicine C', 'Medicine D'],
+  const [medsData, setMedsData] = useState({
+    labels: [],
     datasets: [
       {
-        data: [40, 25, 20, 15],
-        backgroundColor: ['#fbbf24', '#60a5fa', '#34d399', '#f472b6'],
+        data: [],
+        backgroundColor: ['#fbbf24', '#60a5fa', '#34d399', '#f472b6', '#a78bfa'],
         borderWidth: 0,
       },
     ],
-  };
+  });
 
-  const flagged = [
-    { id: 'RX001', patient: 'John Doe', status: 'Flagged', risk: 5, doctor: 'Dr. Smith' },
-    { id: 'RX002', patient: 'Jane Roe', status: 'Flagged', risk: 4, doctor: 'Dr. Lee' },
-    { id: 'RX003', patient: 'Bob Ray', status: 'Cleared', risk: 2, doctor: 'Dr. Adams' },
-  ];
+  const [flagged, setFlagged] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/predict/history')
+      .then((res) => res.json())
+      .then((data) => {
+        setFlagged(
+          data.map((r, i) => ({
+            id: `RX${String(i + 1).padStart(3, '0')}`,
+            patient: r.PATIENT_med,
+            status: r.fraud === 'True' ? 'Flagged' : 'Cleared',
+            risk: Math.min(5, Math.round(Number(r.risk_score) / 20)),
+            doctor: r.PROVIDER,
+          }))
+        );
+
+        const fraudCount = data.filter((r) => r.fraud === 'True' || r.fraud === true).length;
+        const month = new Date().getMonth();
+        const monthlyFraud = data.filter(
+          (r) => new Date(r.timestamp).getMonth() === month && (r.fraud === 'True' || r.fraud === true)
+        ).length;
+        const total = data.length;
+        const detection = total ? Math.round((fraudCount / total) * 100) : 0;
+
+        setKpis((prev) => [
+          { ...prev[0], value: fraudCount },
+          { ...prev[1], value: monthlyFraud },
+          { ...prev[2], value: `${detection}%` },
+        ]);
+
+        const medCounts = {};
+        data.forEach((r) => {
+          const name = r.DESCRIPTION_med;
+          if (name) {
+            medCounts[name] = (medCounts[name] || 0) + 1;
+          }
+        });
+        const topMeds = Object.entries(medCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 4);
+        const labels = topMeds.map(([n]) => n);
+        const counts = topMeds.map(([, c]) => c);
+        setMedsData((prev) => ({
+          ...prev,
+          labels,
+          datasets: [
+            {
+              ...prev.datasets[0],
+              data: counts,
+              backgroundColor: prev.datasets[0].backgroundColor.slice(
+                0,
+                labels.length
+              ),
+            },
+          ],
+        }));
+      })
+      .catch((err) => console.error(err));
+  }, []);
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="space-y-8">
+      <section className="bg-gradient-to-r from-gray-900 to-black text-white rounded-lg p-6 shadow mb-8">
+        <h2 className="text-2xl font-bold">Dashboard Overview</h2>
+        <p className="text-sm text-white/80">Latest fraud prediction statistics</p>
+      </section>
+
       {/* Top KPI Cards */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid gap-6 md:grid-cols-3">
         {kpis.map((kpi) => (
-          <div key={kpi.label} className="bg-white p-4 rounded-lg shadow flex items-center justify-between">
+          <div key={kpi.label} className="bg-gray-800 p-4 rounded-lg shadow flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">{kpi.label}</p>
-              <p className="text-2xl font-semibold text-gray-800">{kpi.value}</p>
+              <p className="text-sm text-gray-400">{kpi.label}</p>
+              <p className="text-2xl font-semibold text-white">{kpi.value}</p>
               <p className="flex items-center text-sm text-green-600">
                 <ArrowUpRight className="w-4 h-4" /> {kpi.percent}%
               </p>
@@ -101,7 +160,7 @@ export default function Home() {
       </div>
 
       {/* Top Medicines */}
-      <div className="bg-white p-6 rounded-lg shadow grid md:grid-cols-2 gap-6 items-center">
+      <div className="bg-gray-800 p-6 rounded-lg shadow grid md:grid-cols-2 gap-6 items-center">
         <div className="w-full max-w-sm mx-auto">
           <Doughnut data={medsData} options={{ plugins: { legend: { display: false } }, cutout: '60%' }} />
         </div>
@@ -130,10 +189,10 @@ export default function Home() {
       </div>
 
       {/* Flagged Prescriptions Table */}
-      <div className="bg-white p-6 rounded-lg shadow overflow-x-auto">
+      <div className="bg-gray-800 p-6 rounded-lg shadow overflow-x-auto">
         <table className="min-w-full text-sm">
           <thead>
-            <tr className="text-left text-gray-600">
+            <tr className="text-left text-gray-300">
               <th className="py-2">Prescription ID</th>
               <th className="py-2">Patient</th>
               <th className="py-2">Status</th>
@@ -162,10 +221,10 @@ export default function Home() {
                   {row.status === 'Flagged' && <AlertTriangle className="text-red-600 w-5 h-5" />}
                 </td>
                 <td className="py-2 flex items-center gap-1">
-                  <UserCircle className="w-5 h-5 text-gray-500" /> {row.doctor}
+                  <UserCircle className="w-5 h-5 text-gray-400" /> {row.doctor}
                 </td>
                 <td className="py-2">
-                  <button className="bg-violet-600 text-white px-3 py-1 rounded-md text-xs hover:bg-violet-700">
+                  <button className="bg-gray-700 text-white px-3 py-1 rounded-md text-xs hover:bg-gray-600">
                     Review
                   </button>
                 </td>
