@@ -1,5 +1,4 @@
-// eslint-disable-next-line no-unused-vars
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { useEffect } from 'react';
 import { Howl } from 'howler';
 import PropTypes from 'prop-types';
@@ -38,7 +37,7 @@ export default function FraudPopup({ isOpen, onClose, result }) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
+        <Motion.div
           className="fixed inset-0 z-50 flex items-center justify-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -48,7 +47,7 @@ export default function FraudPopup({ isOpen, onClose, result }) {
             className="absolute inset-0 bg-black bg-opacity-60"
             onClick={onClose}
           />
-          <motion.div
+          <Motion.div
             onClick={(e) => e.stopPropagation()}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -76,8 +75,8 @@ export default function FraudPopup({ isOpen, onClose, result }) {
                 ✖ Close
               </button>
             </div>
-          </motion.div>
-        </motion.div>
+          </Motion.div>
+        </Motion.div>
       )}
     </AnimatePresence>
   );
