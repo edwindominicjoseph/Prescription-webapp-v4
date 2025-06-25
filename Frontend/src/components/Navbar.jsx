@@ -30,7 +30,7 @@ export default function Navbar() {
         <div className="hidden md:flex space-x-6 items-center">
           <Link to="/" className={linkClass('/')}>Home</Link>
           <Link to="/new" className={linkClass('/new')}>New</Link>
-          <Link to="/flagged" className={linkClass('/flagged')}>Flagged</Link>
+          <Link to="/dashboard" className={linkClass('/dashboard')}>Dashboard</Link>
           <Link to="/profile" className={linkClass('/profile')}>Profile</Link>
           <Link to="/settings" className={linkClass('/settings')}>Settings</Link>
           <button onClick={handleLogout} className="text-gray-700 hover:text-red-600">Logout</button>
@@ -50,7 +50,7 @@ export default function Navbar() {
         <div className="md:hidden px-4 pb-4 space-y-2 bg-white">
           <Link to="/" className={linkClass('/')}>Home</Link>
           <Link to="/new" className={linkClass('/new')}>New</Link>
-          <Link to="/flagged" className={linkClass('/flagged')}>Flagged</Link>
+          <Link to="/dashboard" className={linkClass('/dashboard')}>Dashboard</Link>
           <Link to="/profile" className={linkClass('/profile')}>Profile</Link>
           <Link to="/settings" className={linkClass('/settings')}>Settings</Link>
           <button
