@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Home, PlusCircle, Flag, User, Settings, LogOut, Search } from 'lucide-react';
+import { Home, PlusCircle, LayoutDashboard, User, Settings, LogOut, Search } from 'lucide-react';
 
 export default function Navbar() {
   return (
@@ -29,9 +29,9 @@ export default function Navbar() {
             <PlusCircle className="w-5 h-5" />
             <span className="hidden sm:inline">New</span>
           </Link>
-          <Link to="/flagged" className="flex items-center gap-1 hover:text-pink-400 transition">
-            <Flag className="w-5 h-5" />
-            <span className="hidden sm:inline">Flagged</span>
+          <Link to="/dashboard" className="flex items-center gap-1 hover:text-pink-400 transition">
+            <LayoutDashboard className="w-5 h-5" />
+            <span className="hidden sm:inline">Dashboard</span>
           </Link>
           <Link to="/profile" className="flex items-center gap-1 hover:text-pink-400 transition">
             <User className="w-5 h-5" />
