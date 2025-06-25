@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import FraudPopup from '../components/FraudPopup.jsx';
 
 export default function NewPrescription() {
   const [dispenses, setDispenses] = useState(1);
@@ -6,6 +7,7 @@ export default function NewPrescription() {
   const [totalCost, setTotalCost] = useState(0);
   const [age, setAge] = useState(45);
   const [result, setResult] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Recalculate total cost
   const updateTotal = (disp, cost) => setTotalCost((disp * cost).toFixed(2));
@@ -49,6 +51,7 @@ export default function NewPrescription() {
       });
       const data = await res.json();
       setResult(data);
+      setIsModalOpen(true);
     } catch (err) {
       console.error(err);
     }
@@ -170,6 +173,11 @@ export default function NewPrescription() {
             <p>Fraudulent: {result.fraud ? 'Yes' : 'No'}</p>
           </div>
         )}
+        <FraudPopup
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          result={result}
+        />
       </form>
     </div>
   );
