@@ -2,8 +2,11 @@
 
 body {
   font-family: 'Inter', sans-serif;
+  @apply bg-gray-50 text-gray-800 min-h-screen;
+}
+
+.dark body {
   background: linear-gradient(to bottom right, #000, #111);
-  min-height: 100vh;
   color: #fff;
 }
 
