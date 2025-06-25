@@ -140,7 +140,7 @@ export default function Dashboard() {
       >
         AI-Powered Prescription Fraud Detection Dashboard
       </h1>
-      <div className="md:grid md:grid-cols-[1fr_320px] gap-6">
+      <div className="md:grid md:grid-cols-[40%_60%] gap-6">
         <div className="space-y-6">
           {/* Row 1 */}
           <div className="grid sm:grid-cols-3 gap-4">
