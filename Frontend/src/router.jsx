@@ -14,7 +14,7 @@ export default function AppRouter() {
       <Route path="/flagged" element={<FlaggedPrescriptions />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/profile" element={<UserPage />} />
-        <Route path="/logout" element={<Home />} /> {/* Redirect to Home on logout */}
+        <Route path="/logout" element={<Login />} /> {/* Redirect to Home on logout */}
         <Route path="/login" element={<Login />} />
     </Routes>
   );
