@@ -1,43 +1,13 @@
 import { Link } from 'react-router-dom';
-import {
-  Home,
-  PlusCircle,
-  LayoutDashboard,
-  User,
-  Settings,
-  LogOut,
-  Search,
-  Sun,
-  Moon,
-} from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Home, PlusCircle, LayoutDashboard, User, Settings, LogOut, Search } from 'lucide-react';
 
 export default function Navbar() {
-  const [theme, setTheme] = useState('dark');
-
-  useEffect(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved) setTheme(saved);
-  }, []);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
-
   return (
 
     <nav className="bg-black text-white w-full">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3 space-x-4">
         <div className="flex items-center space-x-2 whitespace-nowrap">
-          <img src="/favicon.svg" alt="logo" className="w-6 h-6" />
+          <span className="text-pink-500">💊</span>
           <span className="font-bold">AI-PrescripSafe</span>
         </div>
         <div className="flex-1 max-w-md hidden sm:block">
@@ -75,9 +45,6 @@ export default function Navbar() {
             <LogOut className="w-5 h-5" />
             <span className="hidden sm:inline">Logout</span>
           </Link>
-          <button onClick={toggleTheme} className="flex items-center gap-1 hover:text-pink-400 transition">
-            {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </button>
 
         </div>
       </div>
