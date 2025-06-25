@@ -117,7 +117,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="space-y-8 animate-fadeIn">
+    <div className="space-y-8">
       <section className="bg-gradient-to-r from-gray-900 to-black text-white rounded-lg p-6 shadow mb-8">
         <h2 className="text-2xl font-bold">Dashboard Overview</h2>
         <p className="text-sm text-white/80">Latest fraud prediction statistics</p>
