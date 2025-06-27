@@ -12,7 +12,6 @@ import {
 } from 'chart.js';
 import MedicationChart from '../components/MedicationChart';
 import RiskTrendChart from '../components/RiskTrendChart';
-import RiskForecastChart from '../components/RiskForecastChart';
 import FlaggedTable from '../components/FlaggedTable';
 
 ChartJS.register(
@@ -233,9 +232,6 @@ export default function Dashboard() {
             </h3>
             <RiskTrendChart data={trendChart} lastUpdated={lastUpdated} />
           </div>
-
-          {/* Forecast Chart */}
-          <RiskForecastChart />
         </div>
 
         {/* Right Panel */}
