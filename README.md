@@ -54,6 +54,7 @@ cd Frontend
 npm install
 npm run dev
 ```
+If you see errors about missing modules such as `react-icons/md`, rerun `npm install` to make sure all dependencies are present.
 ✅ Frontend runs at: http://localhost:5173
 
 📌 API Routes
