@@ -132,7 +132,7 @@ export default function Home() {
 
   return (
     <div className="space-y-8">
-      <section className="min-h-screen flex flex-col items-center justify-center text-center space-y-6 animate-fadeIn">
+      <section className="max-h-[80vh] py-10 flex flex-col items-center justify-center text-center space-y-4 animate-fadeIn">
         <h1 className="text-3xl md:text-4xl font-bold">
           AI-Powered. Fraud-Safe. Trust-Driven Prescriptions.
         </h1>
