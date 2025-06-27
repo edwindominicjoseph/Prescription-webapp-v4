@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Doughnut, Line } from 'react-chartjs-2';
+import { useEffect, useMemo, useState } from 'react';
+import { Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -10,7 +10,9 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Star, AlertTriangle } from 'lucide-react';
+import MedicationChart from '../components/MedicationChart';
+import RiskTrendChart from '../components/RiskTrendChart';
+import FlaggedTable from '../components/FlaggedTable';
 
 ChartJS.register(
   ArcElement,
@@ -50,6 +52,26 @@ export default function Dashboard() {
       },
     ],
   });
+  const [lastUpdated, setLastUpdated] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [search, setSearch] = useState('');
+  const [medFilter, setMedFilter] = useState('');
+  const [selectedRow, setSelectedRow] = useState(null);
+
+  const exportCsv = () => {
+    const header = 'id,patient,doctor,status\n';
+    const rowsData = filteredRows
+      .filter((r) => r.status === 'Flagged')
+      .map((r) => `${r.id},${r.patient},${r.doctor},${r.status}`)
+      .join('\n');
+    const blob = new Blob([header + rowsData], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'flagged.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
     fetch('http://localhost:8000/predict/history')
@@ -62,6 +84,7 @@ export default function Dashboard() {
             status: r.fraud === 'True' || r.fraud === true ? 'Flagged' : 'Cleared',
             risk: Math.min(5, Math.round(Number(r.risk_score) / 20)),
             doctor: r.PROVIDER,
+            medication: r.DESCRIPTION_med,
           }))
         );
         const totalRecords = data.length;
@@ -119,6 +142,7 @@ export default function Dashboard() {
             },
           ],
         }));
+        setLastUpdated(new Date().toLocaleString());
       })
       .catch((err) => console.error(err));
   }, []);
@@ -141,6 +165,16 @@ export default function Dashboard() {
       { data: [100, 0], backgroundColor: ['#2dd4bf', '#e5e7eb'], borderWidth: 0 },
     ],
   };
+
+  const filteredRows = useMemo(() => {
+    return rows
+      .filter((r) => (statusFilter === 'All' ? true : r.status === statusFilter))
+      .filter((r) => (medFilter ? r.medication === medFilter : true))
+      .filter((r) =>
+        r.id.toLowerCase().includes(search.toLowerCase()) ||
+        r.patient.toLowerCase().includes(search.toLowerCase())
+      );
+  }, [rows, statusFilter, search, medFilter]);
 
   return (
     <div className="space-y-6">
@@ -188,27 +222,7 @@ export default function Dashboard() {
             <h3 className="font-semibold mb-4" style={{ color: '#2F5597' }}>
               Fraud Medications
             </h3>
-            <div className="md:flex md:items-start">
-              <div className="md:w-1/2 mx-auto">
-                <Doughnut data={medChart} options={{ plugins: { legend: { display: false } }, cutout: '60%' }} />
-              </div>
-              <ul className="md:w-1/2 space-y-2 mt-4 md:mt-0 md:pl-6 text-sm">
-                {medChart.labels.map((label, idx) => (
-                  <li key={label} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="inline-block w-3 h-3 rounded-sm"
-                        style={{ backgroundColor: medChart.datasets[0].backgroundColor[idx] }}
-                      ></span>
-                      <span>{label}</span>
-                    </div>
-                    <span className="text-gray-400">
-                      {total ? Math.round((medChart.datasets[0].data[idx] / total) * 100) : 0}%
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <MedicationChart data={medChart} onSelect={(m) => setMedFilter(m)} />
           </div>
 
           {/* Risk Trend */}
@@ -216,73 +230,51 @@ export default function Dashboard() {
             <h3 className="font-semibold mb-4" style={{ color: '#2F5597' }}>
               Real Time Risk Score Trend
             </h3>
-            <Line
-              data={trendChart}
-              options={{
-                plugins: { legend: { display: false } },
-                scales: {
-                  x: { ticks: { color: '#ffffff' } },
-                  y: { ticks: { color: '#ffffff' }, beginAtZero: true },
-                },
-              }}
-            />
+            <RiskTrendChart data={trendChart} lastUpdated={lastUpdated} />
           </div>
         </div>
 
         {/* Right Panel */}
-        <div className="bg-gray-800 p-4 rounded-lg">
-          <h3 className="font-semibold mb-4" style={{ color: '#2F5597' }}>
-            Flagged Patients
+        <div className="bg-gray-800 p-4 rounded-lg space-y-4">
+          <h3 className="font-semibold" style={{ color: '#2F5597' }}>
+            Patient Prescriptions
           </h3>
-          <div className="overflow-y-auto max-h-[600px]">
-            <table className="min-w-full text-sm">
-              <thead className="text-left text-gray-300">
-                <tr>
-                  <th className="py-2">Prescription ID</th>
-                  <th className="py-2">Patient</th>
-                  <th className="py-2">Status</th>
-                  <th className="py-2">Fraud Risk</th>
-                  <th className="py-2">Flag</th>
-                  <th className="py-2">Doctor</th>
-                  <th className="py-2" />
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => (
-                  <tr key={row.id} className="border-t">
-                    <td className="py-2 font-medium">{row.id}</td>
-                    <td className="py-2">{row.patient}</td>
-                    <td className="py-2">
-                      <span className={row.status === 'Flagged' ? 'text-red-500' : 'text-green-500'}>
-                        {row.status}
-                      </span>
-                    </td>
-                    <td className="py-2">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-4 h-4 inline ${i < row.risk ? 'text-yellow-400' : 'text-gray-400'}`}
-                        />
-                      ))}
-                    </td>
-                    <td className="py-2">
-                      {row.status === 'Flagged' && (
-                        <AlertTriangle className="text-red-600 w-5 h-5" />
-                      )}
-                    </td>
-                    <td className="py-2">{row.doctor}</td>
-                    <td className="py-2">
-                      <button className="bg-blue-600 text-white px-3 py-1 rounded-md text-xs hover:bg-blue-500">
-                        Review
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <FlaggedTable
+            rows={filteredRows}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            search={search}
+            onSearchChange={setSearch}
+            onReview={(r) => setSelectedRow(r)}
+          />
         </div>
       </div>
+      <button
+        type="button"
+        onClick={exportCsv}
+        className="fixed bottom-6 right-6 bg-green-600 text-white p-3 rounded-full shadow hover:bg-green-500"
+      >
+        Export
+      </button>
+      {selectedRow && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setSelectedRow(null)}>
+          <div className="bg-gray-800 p-6 rounded-lg w-80" onClick={(e) => e.stopPropagation()}>
+            <h4 className="font-semibold mb-2" style={{ color: '#2F5597' }}>
+              Prescription {selectedRow.id}
+            </h4>
+            <p className="text-sm mb-2">Patient: {selectedRow.patient}</p>
+            <p className="text-sm mb-2">Doctor: {selectedRow.doctor}</p>
+            <p className="text-sm mb-4">Status: {selectedRow.status}</p>
+            <button
+              type="button"
+              className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-500"
+              onClick={() => setSelectedRow(null)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
