@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PredictionPopup from '../components/PredictionPopup';
 
 export default function NewPrescription() {
   const [dispenses, setDispenses] = useState(1);
@@ -163,13 +164,8 @@ export default function NewPrescription() {
             ✓ AI Fraud Check
           </button>
         </div>
-        {result && (
-          <div className="mt-4 p-4 bg-gray-700 rounded">
-            <p className="font-medium">Risk Score: {result.risk_score}</p>
-            <p>Medication Risk: {result.medication_risk}</p>
-            <p>Fraudulent: {result.fraud ? 'Yes' : 'No'}</p>
-          </div>
-        )}
+       <PredictionPopup result={result} onClose={() => setResult(null)} />
+
       </form>
     </div>
   );
