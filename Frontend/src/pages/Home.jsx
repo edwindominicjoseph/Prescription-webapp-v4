@@ -8,6 +8,7 @@ import {
   CheckCircle,
   Search,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Doughnut, Line } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend } from 'chart.js';
 
@@ -131,20 +132,26 @@ export default function Home() {
 
   return (
     <div className="space-y-8">
-      <section className="text-center py-16 animate-fadeIn">
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">
+      <section className="min-h-screen flex flex-col items-center justify-center text-center space-y-6 animate-fadeIn">
+        <h1 className="text-3xl md:text-4xl font-bold">
           AI-Powered. Fraud-Safe. Trust-Driven Prescriptions.
         </h1>
-        <p className="text-sm md:text-lg mb-6">
+        <p className="text-sm md:text-lg">
           Detect, Prevent, and Act on Prescription Anomalies in Real Time.
         </p>
-        <div className="flex justify-center gap-4">
-          <button className="bg-pink-600 hover:bg-pink-500 text-white px-4 py-2 rounded-md">
+        <div className="flex space-x-4">
+          <Link
+            to="/signup"
+            className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-md"
+          >
             Try Demo
-          </button>
-          <button className="border border-pink-600 hover:bg-pink-600 text-white px-4 py-2 rounded-md">
+          </Link>
+          <Link
+            to="/mission"
+            className="border border-pink-600 text-pink-600 hover:bg-pink-600 hover:text-white px-4 py-2 rounded-md"
+          >
             Learn More
-          </button>
+          </Link>
         </div>
       </section>
       <section className="bg-gradient-to-r from-gray-900 to-black text-white rounded-lg p-6 shadow mb-8">
