@@ -1,7 +1,13 @@
 export default function PredictionPopup({ result, onClose }) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white text-gray-900 rounded-lg p-6 w-80 max-w-full">
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white text-gray-900 rounded-lg p-6 w-80 max-w-full"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 className="text-xl font-semibold mb-4">Prediction Result</h2>
         <p className="mb-1"><span className="font-medium">Risk Score:</span> {result.risk_score}</p>
         <p className="mb-1"><span className="font-medium">Medication Risk:</span> {result.medication_risk}</p>

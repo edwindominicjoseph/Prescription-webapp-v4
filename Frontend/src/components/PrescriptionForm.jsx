@@ -11,7 +11,7 @@ export default function PrescriptionForm() {
     };
 
     try {
-      const res = await fetch('/api/predict', {
+      const res = await fetch('http://localhost:8000/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
