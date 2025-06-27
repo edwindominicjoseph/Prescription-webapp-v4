@@ -5,6 +5,8 @@ import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import UserPage from './pages/UserPage';
 import Login from './pages/login';
+import Signup from './pages/Signup';
+import Mission from './pages/Mission';
 
 export default function AppRouter() {
   return (
@@ -14,8 +16,10 @@ export default function AppRouter() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/profile" element={<UserPage />} />
-        <Route path="/logout" element={<Login />} /> {/* Redirect to Home on logout */}
-        <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/mission" element={<Mission />} />
+      <Route path="/logout" element={<Login />} /> {/* Redirect to Home on logout */}
+      <Route path="/login" element={<Login />} />
     </Routes>
   );
 }
