@@ -11,41 +11,30 @@ PRED_FILE = Path(__file__).parent / "predictions.csv"
 
 # Define the CSV field order for reading history
 FIELDNAMES = [
+    "PATIENT_med",
     "DESCRIPTION_med",
+    "DATE",
     "ENCOUNTERCLASS",
-    "PROVIDER",
-    "ORGANIZATION",
-    "GENDER",
-    "ETHNICITY",
-    "MARITAL",
-    "STATE",
-    "AGE",
     "DISPENSES",
     "BASE_COST",
     "TOTALCOST",
-    "PATIENT_med",
+    "AGE",
+    "GENDER",
+    "MARITAL",
+    "STATE",
+    "PROVIDER",
+    "ORGANIZATION",
     "fraud",
     "risk_score",
     "medication_risk",
+    "MEDICATION_RISK_CODE",
     "used_model",
     "likely_fraud_types",
-    "timestamp",
 ]
 
 @model_router.post("")
 async def predict(input_data: FraudInput):
     result = await predict_fraud(input_data)
-    record = input_data.dict()
-    record.update(result)
-    record["timestamp"] = datetime.utcnow().isoformat()
-
-    file_exists = PRED_FILE.is_file()
-    with open(PRED_FILE, "a", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
-        if not file_exists:
-            writer.writeheader()
-        writer.writerow({k: record.get(k, "") for k in FIELDNAMES})
-
     return result
 
 
