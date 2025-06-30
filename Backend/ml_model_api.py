@@ -19,6 +19,10 @@ DATA_PATH = Path(__file__).parent / "data" / "Fullcover_merged_with_dates_Enhanc
 df3 = pd.read_csv(DATA_PATH)
 df3["DATE"] = pd.to_datetime(df3["DATE"])
 
+# File paths for prediction logging
+LOG_FILE = Path(__file__).parent / "data" / "prediction_logs.csv"
+PRED_FILE = Path(__file__).parent / "predictions.csv"
+
 # --- Risk Lists ---
 high_risk_medications = [  "pregabalin", "gabapentin", "tapentadol", "carfentanil", "nitrazepam", "zopiclone", "zolpidem",
     "lorazepam", "temazepam", "hydromorphone", "fentanyl", "methadone", "oxycodone", "morphine",
@@ -150,7 +154,7 @@ async def predict_fraud(input: FraudInput):
     entry_date = entry["DATE"].date()
 
     # --- Check for duplicate dispensing via prediction log ---
-    log_path = Path("data/prediction_logs.csv")
+    log_path = LOG_FILE
     duplicate_exists = False
     if log_path.exists():
         with open(log_path, mode="r") as f:
@@ -222,25 +226,58 @@ async def predict_fraud(input: FraudInput):
     if duplicate_exists and "Duplicate Dispensing" not in likely_types:
         likely_types += ", Duplicate Dispensing" if likely_types else "Duplicate Dispensing"
 
-    # --- Log prediction (only general model cases need it for future duplicate detection) ---
+    # --- Log prediction to both CSV files ---
     log_row = {
         "PATIENT_med": entry["PATIENT_med"],
         "DESCRIPTION_med": input.DESCRIPTION_med,
         "DATE": entry["DATE"].strftime("%Y-%m-%d"),
+        "ENCOUNTERCLASS": input.ENCOUNTERCLASS,
+        "DISPENSES": input.DISPENSES,
+        "BASE_COST": input.BASE_COST,
+        "TOTALCOST": input.TOTALCOST,
+        "AGE": input.AGE,
+        "GENDER": input.GENDER,
+        "MARITAL": input.MARITAL,
+        "STATE": input.STATE,
+        "PROVIDER": input.PROVIDER,
+        "ORGANIZATION": input.ORGANIZATION,
         "fraud": is_fraud,
         "risk_score": norm_score,
         "medication_risk": risk_category,
+        "MEDICATION_RISK_CODE": entry["MEDICATION_RISK_CODE"],
         "used_model": model_type,
-        "likely_fraud_types": likely_types
+        "likely_fraud_types": likely_types,
     }
-    log_fields = list(log_row.keys())
-    log_path.parent.mkdir(parents=True, exist_ok=True)
-    write_header = not log_path.exists()
-    with open(log_path, mode="a", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=log_fields)
-        if write_header:
-            writer.writeheader()
-        writer.writerow(log_row)
+    log_fields = [
+        "PATIENT_med",
+        "DESCRIPTION_med",
+        "DATE",
+        "ENCOUNTERCLASS",
+        "DISPENSES",
+        "BASE_COST",
+        "TOTALCOST",
+        "AGE",
+        "GENDER",
+        "MARITAL",
+        "STATE",
+        "PROVIDER",
+        "ORGANIZATION",
+        "fraud",
+        "risk_score",
+        "medication_risk",
+        "MEDICATION_RISK_CODE",
+        "used_model",
+        "likely_fraud_types",
+    ]
+
+    for path in [LOG_FILE, PRED_FILE]:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        write_header = not path.exists()
+        with open(path, mode="a", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=log_fields)
+            if write_header:
+                writer.writeheader()
+            writer.writerow(log_row)
 
     return jsonable_encoder({
         "fraud": is_fraud,
