@@ -90,7 +90,12 @@ general_max = general_model.decision_function(encoded_df[feature_cols]).max()
 # --- Delta Model Training ---
 patient_history = (
     df3.groupby("PATIENT_med")
-    .agg({"BASE_COST": "mean", "TOTALCOST": "mean", "DISPENSES": "mean", "AGE": "first"})
+    .agg(
+        BASE_COST_avg=("BASE_COST", "mean"),
+        TOTALCOST_avg=("TOTALCOST", "mean"),
+        DISPENSES_avg=("DISPENSES", "mean"),
+        AGE=("AGE", "first"),
+    )
     .reset_index()
     .rename(columns={"PATIENT_med": "PATIENT_ID"})
 )
@@ -189,12 +194,14 @@ async def predict_fraud(input: FraudInput):
     matched = patient_history[patient_history["PATIENT_ID"] == entry["PATIENT_ID"]]
     if not matched.empty:
         avg = matched.iloc[0]
-        delta_df = pd.DataFrame([{"delta_base": entry["BASE_COST"] - avg["BASE_COST"],
-                                 "delta_cost": entry["TOTALCOST"] - avg["TOTALCOST"],
-                                 "delta_disp": entry["DISPENSES"] - avg["DISPENSES"],
-                                 "UNIQUE_DOCTOR_COUNT": entry["UNIQUE_DOCTOR_COUNT"],
-                                 "HIGH_RISK_COUNT": entry["HIGH_RISK_COUNT"],
-                                 "TIME_SINCE_LAST": entry["TIME_SINCE_LAST"]}])
+        delta_df = pd.DataFrame([
+            {
+                "delta_base": entry["BASE_COST"] - avg["BASE_COST_avg"],
+                "delta_cost": entry["TOTALCOST"] - avg["TOTALCOST_avg"],
+                "delta_disp": entry["DISPENSES"] - avg["DISPENSES_avg"],
+                 "UNIQUE_DOCTOR_COUNT": entry["UNIQUE_DOCTOR_COUNT"],
+                 "HIGH_RISK_COUNT": entry["HIGH_RISK_COUNT"],
+                 "TIME_SINCE_LAST": entry["TIME_SINCE_LAST"]}])
         score = delta_model.decision_function(delta_df)[0]
         norm_score = int(np.clip((delta_max - score) / (delta_max - delta_min) * 100, 0, 100))
         model_type = "patient history"
