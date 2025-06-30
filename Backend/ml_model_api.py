@@ -161,9 +161,11 @@ async def predict_fraud(input: FraudInput):
             reader = csv.DictReader(f)
             for row in reader:
                 if (
-                    row["PATIENT_med"] == entry["PATIENT_med"]
-                    and row["DESCRIPTION_med"].lower() == entry["DESCRIPTION_med"].lower()
-                    and abs((pd.to_datetime(row["DATE"]).date() - entry_date).days) <= 7
+                    row["PATIENT_med"].strip() == entry["PATIENT_med"].strip()
+                    and row["DESCRIPTION_med"].strip().lower()
+                    == entry["DESCRIPTION_med"].strip().lower()
+                    and abs((pd.to_datetime(row["DATE"]).date() - entry_date).days)
+                    <= 7
                 ):
                     duplicate_exists = True
                     break
