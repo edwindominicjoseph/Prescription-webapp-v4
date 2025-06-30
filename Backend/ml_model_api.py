@@ -154,18 +154,20 @@ async def predict_fraud(input: FraudInput):
     entry_date = entry["DATE"].date()
 
     # --- Check for duplicate dispensing via prediction log ---
-    log_path = LOG_FILE
+    # Look for potential duplicates in the existing prediction logs
+    # (predictions.csv). This CSV acts as our simple history store
+    # since no database is used.
+    log_path = PRED_FILE
     duplicate_exists = False
     if log_path.exists():
         with open(log_path, mode="r") as f:
             reader = csv.DictReader(f)
             for row in reader:
+                parsed_date = pd.to_datetime(row["DATE"]).date()
                 if (
-                    row["PATIENT_med"].strip() == entry["PATIENT_med"].strip()
-                    and row["DESCRIPTION_med"].strip().lower()
-                    == entry["DESCRIPTION_med"].strip().lower()
-                    and abs((pd.to_datetime(row["DATE"]).date() - entry_date).days)
-                    <= 7
+                    row["PATIENT_med"] == entry["PATIENT_med"]
+                    and row["DESCRIPTION_med"] == entry["DESCRIPTION_med"]
+                    and abs((parsed_date - entry_date).days) <= 7
                 ):
                     duplicate_exists = True
                     break
