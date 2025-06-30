@@ -125,25 +125,28 @@ def infer_fraud_type(entry):
 # --- Input Schema (NO engineered features included) ---
 class FraudInput(BaseModel):
     DESCRIPTION_med: str
-    ENCOUNTERCLASS: str
-    PROVIDER: str
-    ORGANIZATION: str
-    GENDER: str
-    ETHNICITY: str
-    MARITAL: str
-    STATE: str
-    AGE: int
-    DISPENSES: float
-    BASE_COST: float
-    TOTALCOST: float
+    ENCOUNTERCLASS: str | None = "unknown"
+    PROVIDER: str | None = "unknown"
+    ORGANIZATION: str | None = "unknown"
+    GENDER: str | None = "unknown"
+    ETHNICITY: str | None = "unknown"
+    MARITAL: str | None = "unknown"
+    STATE: str | None = "unknown"
+    AGE: int | None = 0
+    DISPENSES: float | None = 0.0
+    BASE_COST: float | None = 0.0
+    TOTALCOST: float | None = 0.0
     PATIENT_med: str
-    DATE: str
+    DATE: str | None = None
 
 # --- Predict Endpoint ---
 @app.post("/predict")
 async def predict_fraud(input: FraudInput):
     entry = input.dict()
-    entry["DATE"] = pd.to_datetime(entry["DATE"])
+    if not entry.get("DATE"):
+        entry["DATE"] = pd.Timestamp.today()
+    else:
+        entry["DATE"] = pd.to_datetime(entry["DATE"])
     entry_date = entry["DATE"].date()
 
     # --- Check for duplicate dispensing via prediction log ---
