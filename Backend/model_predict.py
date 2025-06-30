@@ -28,23 +28,24 @@ FIELDNAMES = [
     "risk_score",
     "medication_risk",
     "used_model",
-    "shap_features",
-    "shap_values",
+    "likely_fraud_types",
     "timestamp",
 ]
 
 @model_router.post("")
-def predict(input_data: FraudInput):
-    result = predict_fraud(input_data)
+async def predict(input_data: FraudInput):
+    result = await predict_fraud(input_data)
     record = input_data.dict()
     record.update(result)
     record["timestamp"] = datetime.utcnow().isoformat()
+
     file_exists = PRED_FILE.is_file()
     with open(PRED_FILE, "a", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=record.keys())
+        writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
         if not file_exists:
             writer.writeheader()
-        writer.writerow(record)
+        writer.writerow({k: record.get(k, "") for k in FIELDNAMES})
+
     return result
 
 
@@ -54,6 +55,6 @@ def get_prediction_history():
     if not PRED_FILE.is_file():
         return []
     with open(PRED_FILE, newline="") as f:
-        reader = csv.DictReader(f, fieldnames=FIELDNAMES)
+        reader = csv.DictReader(f)
         return list(reader)
 
