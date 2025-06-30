@@ -15,9 +15,52 @@ from sklearn.preprocessing import LabelEncoder
 app = FastAPI()
 
 # --- Load Enriched Dataset ---
-DATA_PATH = Path(__file__).parent / "data" / "Fullcover_merged_with_dates_Enhanced_.csv"
+DATA_PATH = Path(__file__).parent / "data" / "Fullcover_merged_with_dates_Enhanced.csv"
 df3 = pd.read_csv(DATA_PATH)
 df3["DATE"] = pd.to_datetime(df3["DATE"])
+
+# --- Risk Lists ---
+high_risk_medications = [  "pregabalin", "gabapentin", "tapentadol", "carfentanil", "nitrazepam", "zopiclone", "zolpidem",
+    "lorazepam", "temazepam", "hydromorphone", "fentanyl", "methadone", "oxycodone", "morphine",
+    "alfentanil", "hydrocodone bitartrate", "medroxyPROGESTERone acetate", "leuprolide acetate",
+    "enoxaparin sodium", "docetaxel", "epinephrine", "fluorouracil", "oxaliplatin", "furosemide",
+    "doxorubicin hydrochloride", "fulvestrant", "sufentanil", "abuse-deterrent oxycodone hydrochloride",
+    "amiodarone hydrochloride", "vancomycin", "tramadol", "Morphine Sulfate",
+    "Oxycodone Hydrochloride", "Codeine Phosphate", "Methadone Hydrochloride",
+    "Tramadol Hydrochloride", "Meperidine Hydrochloride", "Buprenorphine / Naloxone",
+    "Lorazepam", "Diazepam", "Midazolam", "Clonazepam", "Remifentanil",
+    "Nicotine Transdermal Patch", "Propofol"]  # ⬅️ Your full high risk list
+
+
+moderate_risk_medications = [ "rivaroxaban", "dabigatran", "azathioprine", "baricitinib", "moxifloxacin", "clarithromycin",
+    "erythromycin", "ondansetron", "donepezil hydrochloride", "memantine hydrochloride",
+    "metformin hydrochloride", "nicotine transdermal patch", "ethinyl estradiol", "norelgestromin",
+    "fluticasone propionate", "liraglutide", "norepinephrine", "alendronic acid", "amoxicillin clavulanate",
+    "alprazolam", "salmeterol fluticasone", "piperacillin tazobactam",
+    "fentanyl transdermal system", "warfarin", "acetaminophen hydrocodone", "cimetidine",
+    "DOCEtaxel", "Epirubicin Hydrochloride", "Cyclophosphamide", "Cisplatin", "Methotrexate",
+    "PACLitaxel", "Carboplatin", "Leuprolide Acetate", "Letrozole", "Anastrozole", "Exemestane",
+    "Tamoxifen", "Palbociclib", "Ribociclib", "Neratinib", "Lapatinib",
+    "Ethinyl Estradiol / Norelgestromin", "Mirena", "Kyleena", "Liletta", "NuvaRing", "Yaz",
+    "Levora", "Natazia", "Trinessa", "Camila", "Jolivette", "Errin", "Remdesivir",
+    "Heparin sodium porcine", "Alteplase", "Atropine Sulfate", "Desflurane", "Isoflurane",
+    "Sevoflurane", "Rocuronium bromide", "Epoetin Alfa", "Glycopyrrolate", "Aviptadil",
+    "Leronlimab", "Lenzilumab" ]  # ⬅️ Your full moderate risk list
+
+
+
+risk_mapping = {"Low Risk": 0, "Moderate Risk": 1, "High Risk": 2}
+
+def categorize_risk(med_name: str) -> str:
+    name = med_name.lower()
+    if any(k in name for k in [m.lower() for m in high_risk_medications]):
+        return "High Risk"
+    if any(k in name for k in [m.lower() for m in moderate_risk_medications]):
+        return "Moderate Risk"
+    return "Low Risk"
+
+df3["MEDICATION_RISK"] = df3["DESCRIPTION_med"].apply(categorize_risk)
+df3["MEDICATION_RISK_CODE"] = df3["MEDICATION_RISK"].map(risk_mapping)
 
 # --- Risk Classifier ---
 risk_mapping = {"Low Risk": 0, "Moderate Risk": 1, "High Risk": 2}
