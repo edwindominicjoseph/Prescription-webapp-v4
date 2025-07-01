@@ -15,8 +15,8 @@ FIELDNAMES = [
     "DESCRIPTION_med", "ENCOUNTERCLASS", "PROVIDER", "ORGANIZATION", "GENDER",
     "ETHNICITY", "MARITAL", "STATE", "AGE", "DISPENSES", "BASE_COST", "TOTALCOST",
     "PATIENT_med", "fraud", "risk_score", "medication_risk", "used_model",
-    "shap_features", "shap_values", "HIGH_RISK_COUNT", "UNIQUE_DOCTOR_COUNT",
-    "TIME_SINCE_LAST", "flags", "likely_fraud", "timestamp"
+    "HIGH_RISK_COUNT", "UNIQUE_DOCTOR_COUNT", "TIME_SINCE_LAST",
+    "flags", "likely_fraud", "timestamp"
 ]
 
 @model_router.post("/")
@@ -24,6 +24,19 @@ def predict(input_data: FraudInput):
     result = predict_fraud(input_data)
     record = input_data.dict()
     record.update(result)
+
+    # Remove complex fields if they accidentally appear
+    record.pop("shap_features", None)
+    record.pop("shap_values", None)
+    result.pop("shap_features", None)
+    result.pop("shap_values", None)
+
+    # Keep only serializable primitives in the record
+    for key, value in list(record.items()):
+        if isinstance(value, datetime):
+            record[key] = value.isoformat()
+        elif not isinstance(value, (str, int, float, bool)):
+            record.pop(key)
 
     history_df = []
     if PRED_FILE.is_file():
@@ -119,7 +132,7 @@ def predict(input_data: FraudInput):
     file_exists = PRED_FILE.is_file()
     with open(PRED_FILE, "a", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
-        if not file_exists:
+        if not file_exists or PRED_FILE.stat().st_size == 0:
             writer.writeheader()
         writer.writerow(record)
 
