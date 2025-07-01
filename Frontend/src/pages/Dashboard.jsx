@@ -51,11 +51,26 @@ export default function Dashboard() {
   const handleBypass = async () => {
     if (!selectedRow) return;
     try {
+      // record the bypass event
+      await fetch('http://localhost:8000/bypass', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rx_id: selectedRow.id,
+          patient: selectedRow.patient,
+          doctor: selectedRow.doctor,
+          medication: selectedRow.medication,
+          status: 'RARE',
+        }),
+      });
+
+      // also whitelist the patient for subsequent predictions
       const res = await fetch('http://localhost:8000/predict/bypass', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ patient_id: selectedRow.patient }),
       });
+
       if (res.ok) {
         setRows((prev) =>
           prev.map((r) =>
