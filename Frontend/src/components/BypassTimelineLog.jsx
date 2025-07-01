@@ -10,16 +10,22 @@ export default function BypassTimelineLog() {
       range === 'all'
         ? 'http://localhost:8000/bypass-logs'
         : `http://localhost:8000/bypass-logs?days=${range}`;
+    console.log('Fetching bypass logs from', url);
     fetch(url)
       .then((res) => res.json())
-      .then((items) => setData(items))
-      .catch((err) => console.error(err));
+      .then((items) => {
+        console.log('Fetched bypass logs:', items);
+        setData(items);
+      })
+      .catch((err) => console.error('Failed to fetch bypass logs', err));
   }, [range]);
 
   const filtered = useMemo(() => {
-    let records = data.filter(
-      (d) => (d.status || '').toLowerCase().includes('bypass') || (d.status || '').toLowerCase() === 'rare'
-    );
+    let records = data.filter((d) => {
+      const status = (d.status || '').toLowerCase();
+      return status.includes('bypass') || status === 'rare';
+    });
+    console.log('Filtered bypass records:', records);
     records = records.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     return records;
   }, [data]);

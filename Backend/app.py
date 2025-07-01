@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from auth import auth_router
 from model_predict import model_router
 from users import user_router
@@ -63,8 +64,11 @@ def get_bypass_logs(days: int | None = None):
 
     bypass_file = Path(__file__).parent / "bypass_log.csv"
     if not bypass_file.is_file():
-        return []
-    df = pd.read_csv(bypass_file)
+        return JSONResponse([], headers={"Cache-Control": "no-cache"})
+    try:
+        df = pd.read_csv(bypass_file)
+    except Exception:
+        return JSONResponse([], headers={"Cache-Control": "no-cache"})
 
     # Normalise column names so the frontend has a consistent structure
     column_map = {
@@ -82,9 +86,12 @@ def get_bypass_logs(days: int | None = None):
         df["timestamp"] = df["date"]
 
     if "timestamp" in df.columns:
-        df["timestamp"] = pd.to_datetime(df["timestamp"])
+        df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
+        df = df.dropna(subset=["timestamp"])  # ignore malformed dates
         df = df.sort_values("timestamp", ascending=False)
         if days is not None:
             cutoff = pd.Timestamp.now() - pd.Timedelta(days=days)
             df = df[df["timestamp"] >= cutoff]
-    return df.to_dict(orient="records")
+
+    records = df.to_dict(orient="records")
+    return JSONResponse(records, headers={"Cache-Control": "no-cache"})
