@@ -1,5 +1,6 @@
-Oxycodone Hydrochloride 10 MG,inpatient,Dr.ABC,City Health,M,unknown,M,Massachusetts,45,1.0,7.0,7.0,demo_patient_01,True,59,Low Risk,general population,,,0,1,0,,False,2025-07-01T09:48:14.410217
-Paracetamol 600 mg,inpatient,Dr.ABC,City Health,M,unknown,M,Massachusetts,45,1.0,7.0,7.0,demo_patient_01,True,59,Low Risk,general population,,,0,1,0,,False,2025-07-01T09:48:48.704146
-Paracetamol 600 mg,inpatient,Dr.ABC,City Health,M,unknown,M,Massachusetts,45,1.0,7.0,7.0,demo_patient_01,True,59,Low Risk,general population,,,0,1,0,,False,2025-07-01T09:48:52.013440
-Paracetamol 600 mg,inpatient,Dr.ABC,City Health,M,unknown,M,Massachusetts,45,1.0,7.0,7.0,demo_patient_01,True,59,Low Risk,general population,,,0,1,0,,False,2025-07-01T09:48:54.958932
-Paracetamol 600 mg,inpatient,Dr.ABC,City Health,M,unknown,M,Massachusetts,45,1.0,7.0,7.0,demo_patient_01,True,59,Low Risk,general population,,,0,1,0,,False,2025-07-01T09:48:57.449159
+DESCRIPTION_med,ENCOUNTERCLASS,PROVIDER,ORGANIZATION,GENDER,ETHNICITY,MARITAL,STATE,AGE,DISPENSES,BASE_COST,TOTALCOST,PATIENT_med,fraud,risk_score,medication_risk,used_model,HIGH_RISK_COUNT,UNIQUE_DOCTOR_COUNT,TIME_SINCE_LAST,flags,likely_fraud,timestamp
+Oxycodone Hydrochloride 10 MG,inpatient,Dr.ABC,City Health,M,unknown,M,Massachusetts,45,1.0,7.0,7.0,demo_patient_01,True,59,Low Risk,general population,0,1,0,,False,2025-07-01T09:48:14.410217
+Paracetamol 600 mg,inpatient,Dr.ABC,City Health,M,unknown,M,Massachusetts,45,1.0,7.0,7.0,demo_patient_01,True,59,Low Risk,general population,0,1,0,,False,2025-07-01T09:48:48.704146
+Paracetamol 600 mg,inpatient,Dr.ABC,City Health,M,unknown,M,Massachusetts,45,1.0,7.0,7.0,demo_patient_01,True,59,Low Risk,general population,0,1,0,,False,2025-07-01T09:48:52.013440
+Paracetamol 600 mg,inpatient,Dr.ABC,City Health,M,unknown,M,Massachusetts,45,1.0,7.0,7.0,demo_patient_01,True,59,Low Risk,general population,0,1,0,,False,2025-07-01T09:48:54.958932
+Paracetamol 600 mg,inpatient,Dr.ABC,City Health,M,unknown,M,Massachusetts,45,1.0,7.0,7.0,demo_patient_01,True,59,Low Risk,general population,0,1,0,,False,2025-07-01T09:48:57.449159
