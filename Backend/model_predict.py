@@ -58,7 +58,7 @@ def predict(input_data: FraudInput):
 
     # --- Rare Condition Bypass ---
     if record["PATIENT_med"] in RARE_CASE_PATIENTS:
-        flags = ["Patient is exempted due to a known rare condition"]
+        flags = ["RC"]
         record["likely_fraud"] = False
         result["fraud"] = False
         record["fraud"] = False

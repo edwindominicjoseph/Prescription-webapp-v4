@@ -69,7 +69,14 @@ export default function Dashboard() {
       if (res.ok) {
         setRows((prev) =>
           prev.map((r) =>
-            r.id === selectedRow.id ? { ...r, rare: true, status: 'Cleared' } : r
+            r.id === selectedRow.id
+              ? {
+                  ...r,
+                  flags: 'RC',
+                  likely_fraud: false,
+                  status: 'Cleared',
+                }
+              : r
           )
         );
         setSelectedRow(null);
@@ -102,13 +109,15 @@ export default function Dashboard() {
           data.map((r, i) => ({
             id: `RX${String(i + 1).padStart(3, '0')}`,
             patient: r.PATIENT_med,
-            status: r.fraud === 'True' || r.fraud === true ? 'Flagged' : 'Cleared',
             risk: Math.min(5, Math.round(Number(r.risk_score) / 20)),
             doctor: r.PROVIDER,
             medication: r.DESCRIPTION_med,
-            rare: Array.isArray(r.flags)
-              ? r.flags.includes('Patient is exempted due to a known rare condition')
-              : r.flags?.includes('rare condition'),
+            flags: r.flags,
+            likely_fraud: r.likely_fraud === 'True' || r.likely_fraud === true,
+            status:
+              r.likely_fraud === 'True' || r.likely_fraud === true
+                ? 'Flagged'
+                : 'Cleared',
           }))
         );
         const totalRecords = data.length;
