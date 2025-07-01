@@ -1,29 +1,21 @@
-import { useState, useEffect, useMemo } from 'react';
+import PropTypes from 'prop-types';
+import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 
-export default function BypassTimelineLog() {
+export default function BypassTimelineLog({ data }) {
   const [range, setRange] = useState('30');
-  const [data, setData] = useState([]);
-
-  useEffect(() => {
-    const url =
-      range === 'all'
-        ? 'http://localhost:8000/bypass-logs'
-        : `http://localhost:8000/bypass-logs?days=${range}`;
-    fetch(url)
-      .then((res) => res.json())
-      .then((items) => setData(items))
-      .catch((err) => console.error(err));
-  }, [range]);
 
   const filtered = useMemo(() => {
-    let records = data.filter((d) =>
-      (d.status || '').toLowerCase().includes('bypass') ||
-      (d.status || '').toLowerCase() === 'rare'
-    );
+    let records = data.filter((d) => d.status === 'RARE');
     records = records.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    if (range !== 'all') {
+      const days = Number(range);
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+      records = records.filter((d) => new Date(d.timestamp) >= cutoff);
+    }
     return records;
-  }, [data]);
+  }, [data, range]);
 
   return (
     <div className="bg-gray-800 p-4 rounded-lg">
@@ -73,3 +65,6 @@ export default function BypassTimelineLog() {
   );
 }
 
+BypassTimelineLog.propTypes = {
+  data: PropTypes.array.isRequired,
+};
