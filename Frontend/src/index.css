@@ -31,11 +31,7 @@ body {
   padding: 2px 6px;
   border-radius: 5px;
   font-size: 0.8rem;
-  font-weight: 600;
-  line-height: 1;
-  display: inline-block;
   white-space: nowrap;
-  text-align: center;
 }
 
 .status-tag.flagged {
@@ -49,7 +45,7 @@ body {
 }
 
 .status-tag.rare {
-  background-color: #f39c12;
+  background-color: #e09110;
   color: white;
 }
 
