@@ -52,12 +52,15 @@ export default function FraudInsightsPanel() {
   }, []);
 
   const current = data[view];
+
+  const COLORS = ['#e74c3c', '#f39c12', '#27ae60', '#2980b9', '#8e44ad'];
+
   const chartData = {
     labels: current.map(([name]) => name),
     datasets: [
       {
         data: current.map(([, count]) => count),
-        backgroundColor: '#dc2626',
+        backgroundColor: COLORS.slice(0, current.length),
         borderWidth: 1,
       },
     ],
