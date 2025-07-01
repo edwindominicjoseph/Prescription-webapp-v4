@@ -52,19 +52,27 @@ export default function Dashboard() {
   const handleBypass = async () => {
     if (!selectedRow) return;
     try {
-      const res = await fetch('http://localhost:8000/predict/bypass', {
+      await fetch('http://localhost:8000/bypass', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ patient_id: selectedRow.patient }),
+        body: JSON.stringify({
+          rx_id: selectedRow.id,
+          patient: selectedRow.patient,
+          doctor: selectedRow.doctor,
+          medication: selectedRow.medication,
+          status: 'RARE',
+        }),
       });
-      if (res.ok) {
-        setRows((prev) =>
-          prev.map((r) =>
-            r.id === selectedRow.id ? { ...r, rare: true, status: 'Cleared' } : r
-          )
-        );
-        setSelectedRow(null);
-      }
+      setRows((prev) =>
+        prev.map((r) =>
+          r.id === selectedRow.id ? { ...r, status: 'RARE' } : r
+        )
+      );
+      setSelectedRow(null);
+      fetch('http://localhost:8000/bypass-logs')
+        .then((res) => res.json())
+        .then((items) => setBypassHistory(items))
+        .catch((err) => console.error(err));
     } catch (err) {
       console.error(err);
     }
@@ -138,7 +146,7 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    fetch('http://localhost:8000/predict/bypass-history')
+    fetch('http://localhost:8000/bypass-logs')
       .then((res) => res.json())
       .then((items) => setBypassHistory(items))
       .catch((err) => console.error(err));
