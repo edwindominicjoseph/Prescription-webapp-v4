@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import NewPrescription from './pages/NewPrescription';
 import Dashboard from './pages/Dashboard';
+import EnhancedDashboard from './pages/EnhancedDashboard';
 import Settings from './pages/Settings';
 import UserPage from './pages/UserPage';
 import Login from './pages/login';
@@ -14,6 +15,7 @@ export default function AppRouter() {
       <Route path="/" element={<Home />} />
       <Route path="/new" element={<NewPrescription />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/enhanced" element={<EnhancedDashboard />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/profile" element={<UserPage />} />
       <Route path="/signup" element={<Signup />} />
