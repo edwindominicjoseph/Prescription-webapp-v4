@@ -49,8 +49,15 @@ def bypass_prescription(entry: dict):
 
 
 @app.get("/bypass-logs")
-def get_bypass_logs():
-    """Return logged bypassed prescriptions sorted by most recent."""
+def get_bypass_logs(days: int | None = None):
+    """Return logged bypassed prescriptions sorted by most recent.
+
+    Parameters
+    ----------
+    days: int | None
+        Optional number of days back to include. If provided, only records
+        with a timestamp within the last `days` days will be returned.
+    """
     import pandas as pd
     from pathlib import Path
 
@@ -58,6 +65,26 @@ def get_bypass_logs():
     if not bypass_file.is_file():
         return []
     df = pd.read_csv(bypass_file)
+
+    # Normalise column names so the frontend has a consistent structure
+    column_map = {
+        "prescription_id": "rx_id",
+        "patient_name": "patient",
+        "doctor_name": "doctor",
+        "medication_name": "medication",
+        "date": "timestamp",
+    }
+    for src, dest in column_map.items():
+        if src in df.columns and dest not in df.columns:
+            df[dest] = df[src]
+
+    if "timestamp" not in df.columns and "date" in df.columns:
+        df["timestamp"] = df["date"]
+
     if "timestamp" in df.columns:
+        df["timestamp"] = pd.to_datetime(df["timestamp"])
         df = df.sort_values("timestamp", ascending=False)
+        if days is not None:
+            cutoff = pd.Timestamp.now() - pd.Timedelta(days=days)
+            df = df[df["timestamp"] >= cutoff]
     return df.to_dict(orient="records")
