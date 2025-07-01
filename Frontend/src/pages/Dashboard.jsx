@@ -13,6 +13,7 @@ import {
 import FraudInsightsPanel from '../components/FraudInsightsPanel';
 import RiskTrendChart from '../components/RiskTrendChart';
 import FlaggedTable from '../components/FlaggedTable';
+import BypassTimeline from '../components/BypassTimeline';
 
 ChartJS.register(
   ArcElement,
@@ -46,6 +47,7 @@ export default function Dashboard() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [selectedRow, setSelectedRow] = useState(null);
+  const [bypassHistory, setBypassHistory] = useState([]);
 
   const handleBypass = async () => {
     if (!selectedRow) return;
@@ -132,6 +134,13 @@ export default function Dashboard() {
         }));
         setLastUpdated(new Date().toLocaleString());
       })
+      .catch((err) => console.error(err));
+  }, []);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/predict/bypass-history')
+      .then((res) => res.json())
+      .then((items) => setBypassHistory(items))
       .catch((err) => console.error(err));
   }, []);
 
@@ -229,6 +238,7 @@ export default function Dashboard() {
             onSearchChange={setSearch}
             onReview={(r) => setSelectedRow(r)}
           />
+          <BypassTimeline data={bypassHistory} />
         </div>
       </div>
       <button

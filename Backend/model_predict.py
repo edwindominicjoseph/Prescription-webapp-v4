@@ -177,3 +177,27 @@ def bypass_patient(data: BypassInput):
     with open(WHITELIST_FILE, "w") as f:
         json.dump(sorted(RARE_CASE_PATIENTS), f)
     return {"message": f"{pid} added to whitelist"}
+
+
+@model_router.get("/bypass-history")
+def bypass_history():
+    """Return records manually bypassed due to rare conditions."""
+    if not PRED_FILE.is_file():
+        return []
+    events = []
+    with open(PRED_FILE, newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            flags = row.get("flags", "")
+            if "rare" in flags.lower():
+                events.append(
+                    {
+                        "timestamp": row.get("timestamp"),
+                        "PATIENT_med": row.get("PATIENT_med"),
+                        "PROVIDER": row.get("PROVIDER"),
+                        "DESCRIPTION_med": row.get("DESCRIPTION_med"),
+                        "flags": flags,
+                        "status": "RARE",
+                    }
+                )
+    return events

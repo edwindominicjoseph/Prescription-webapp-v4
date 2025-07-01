@@ -62,6 +62,7 @@ Route                     Description
 POST /auth/login          Login (email + password)
 POST /predict             Fraud prediction via ML model
 GET /user/...             (Optional) User routes
+GET /predict/bypass-history  Recently bypassed rare cases
 
 💡 Features
 ✅ Rule-based + ML medication risk classification
