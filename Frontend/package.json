@@ -13,7 +13,6 @@
     "@tailwindcss/vite": "^4.1.10",
     "chart.js": "^4.5.0",
     "chartjs-plugin-datalabels": "^2.2.0",
-    "framer-motion": "^12.20.5",
     "lucide-react": "^0.522.0",
     "prop-types": "^15.8.1",
     "react": "^19.1.0",
