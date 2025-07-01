@@ -173,8 +173,6 @@ def predict_fraud(input: FraudInput):
         "risk_score": norm_score,
         "medication_risk": risk_category,
         "used_model": model_type,
-        "shap_features": shap_input.to_dict(orient="records")[0],
-        "shap_values": shap_values.values[0].tolist(),
         "HIGH_RISK_COUNT": entry["HIGH_RISK_COUNT"],
         "UNIQUE_DOCTOR_COUNT": entry["UNIQUE_DOCTOR_COUNT"],
         "TIME_SINCE_LAST": entry["TIME_SINCE_LAST"]
