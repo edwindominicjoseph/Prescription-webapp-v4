@@ -8,8 +8,8 @@ export default function BypassTimelineLog() {
   useEffect(() => {
     const url =
       range === 'all'
-        ? 'http://localhost:8000/bypass-logs'
-        : `http://localhost:8000/bypass-logs?days=${range}`;
+        ? '/bypass-logs'
+        : `/bypass-logs?days=${range}`;
     fetch(url)
       .then((res) => res.json())
       .then((items) => setData(items))

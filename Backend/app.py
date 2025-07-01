@@ -88,4 +88,6 @@ def get_bypass_logs(days: int | None = None):
         if days is not None:
             cutoff = pd.Timestamp.now() - pd.Timedelta(days=days)
             df = df[df["timestamp"] >= cutoff]
+        # convert to ISO 8601 strings so FastAPI can serialise consistently
+        df["timestamp"] = df["timestamp"].dt.strftime("%Y-%m-%dT%H:%M:%S")
     return df.to_dict(orient="records")
