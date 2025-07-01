@@ -13,6 +13,7 @@ import {
 import FraudInsightsPanel from '../components/FraudInsightsPanel';
 import RiskTrendChart from '../components/RiskTrendChart';
 import FlaggedTable from '../components/FlaggedTable';
+import BypassTimelineLog from '../components/BypassTimelineLog';
 
 ChartJS.register(
   ArcElement,
@@ -50,11 +51,26 @@ export default function Dashboard() {
   const handleBypass = async () => {
     if (!selectedRow) return;
     try {
-      const res = await fetch('http://localhost:8000/predict/bypass', {
+      // record the bypass event
+      await fetch('/bypass', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rx_id: selectedRow.id,
+          patient: selectedRow.patient,
+          doctor: selectedRow.doctor,
+          medication: selectedRow.medication,
+          status: 'RARE',
+        }),
+      });
+
+      // also whitelist the patient for subsequent predictions
+      const res = await fetch('/predict/bypass', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ patient_id: selectedRow.patient }),
       });
+
       if (res.ok) {
         setRows((prev) =>
           prev.map((r) =>
@@ -84,7 +100,7 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetch('http://localhost:8000/predict/history')
+    fetch('/predict/history')
       .then((res) => res.json())
       .then((data) => {
         setRows(
@@ -229,6 +245,7 @@ export default function Dashboard() {
             onSearchChange={setSearch}
             onReview={(r) => setSelectedRow(r)}
           />
+          <BypassTimelineLog />
         </div>
       </div>
       <button
