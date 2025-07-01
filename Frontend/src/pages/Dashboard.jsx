@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
 import { Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -13,6 +14,7 @@ import {
 import FraudInsightsPanel from '../components/FraudInsightsPanel';
 import RiskTrendChart from '../components/RiskTrendChart';
 import FlaggedTable from '../components/FlaggedTable';
+import BypassedTable from '../components/BypassedTable';
 
 ChartJS.register(
   ArcElement,
@@ -46,23 +48,30 @@ export default function Dashboard() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [selectedRow, setSelectedRow] = useState(null);
+  const [bypassed, setBypassed] = useState([]);
+
+  const fetchBypassed = () => {
+    axios
+      .get('http://localhost:8000/get-bypassed')
+      .then((res) => setBypassed(res.data))
+      .catch((err) => console.error(err));
+  };
 
   const handleBypass = async () => {
     if (!selectedRow) return;
     try {
-      const res = await fetch('http://localhost:8000/predict/bypass', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ patient_id: selectedRow.patient }),
+      await axios.post('http://localhost:8000/log-bypass', {
+        patient_name: selectedRow.patient,
+        medication: selectedRow.medication,
+        status: 'RARE',
       });
-      if (res.ok) {
-        setRows((prev) =>
-          prev.map((r) =>
-            r.id === selectedRow.id ? { ...r, rare: true, status: 'Cleared' } : r
-          )
-        );
-        setSelectedRow(null);
-      }
+      setRows((prev) =>
+        prev.map((r) =>
+          r.id === selectedRow.id ? { ...r, rare: true, status: 'RARE' } : r
+        )
+      );
+      fetchBypassed();
+      setSelectedRow(null);
     } catch (err) {
       console.error(err);
     }
@@ -84,6 +93,7 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    fetchBypassed();
     fetch('http://localhost:8000/predict/history')
       .then((res) => res.json())
       .then((data) => {
@@ -230,6 +240,12 @@ export default function Dashboard() {
             onReview={(r) => setSelectedRow(r)}
           />
         </div>
+      </div>
+      <div className="bg-gray-800 p-4 rounded-lg space-y-2">
+        <h3 className="font-semibold" style={{ color: '#2F5597' }}>
+          Bypassed Prescriptions
+        </h3>
+        <BypassedTable rows={bypassed} />
       </div>
       <button
         type="button"
