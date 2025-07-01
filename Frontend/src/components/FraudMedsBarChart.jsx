@@ -8,18 +8,38 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, ChartDataLabels);
 
 export default function FraudMedsBarChart({ data, onSelect }) {
   const options = {
     indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
       tooltip: {
+        backgroundColor: '#1f2937',
+        titleColor: '#fff',
+        bodyColor: '#fff',
         callbacks: {
-          label: (ctx) => `${ctx.parsed.x} cases`,
+          label: (ctx) => {
+            const { parsed, dataset } = ctx;
+            const avg = dataset.avgRisk?.[ctx.dataIndex];
+            const doc = dataset.doctor?.[ctx.dataIndex];
+            const parts = [`${parsed.x} flags`];
+            if (avg) parts.push(`Avg Risk: ${avg}`);
+            if (doc) parts.push(`Doctor: ${doc}`);
+            return parts.join(' | ');
+          },
         },
+      },
+      datalabels: {
+        color: '#fff',
+        anchor: 'end',
+        align: 'right',
+        formatter: (val) => val,
       },
     },
     scales: {
@@ -34,7 +54,7 @@ export default function FraudMedsBarChart({ data, onSelect }) {
     },
   };
 
-  return <Bar data={data} options={options} />;
+  return <Bar data={data} options={options} style={{ backgroundColor: 'transparent' }} />;
 }
 
 FraudMedsBarChart.propTypes = {
