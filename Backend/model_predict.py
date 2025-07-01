@@ -37,31 +37,59 @@ def predict(input_data: FraudInput):
     # --- 1. Duplicate Dispensing ---
     duplicate_flag = None
     for r in history_df:
+        if not (
+            "PATIENT_med" in r and
+            "DESCRIPTION_med" in r and
+            ("DATE" in r or "timestamp" in r)
+        ):
+            print(f"Skipping malformed row: {r}")
+            continue
+
         if (
             r["PATIENT_med"] == record["PATIENT_med"] and
-            r["DESCRIPTION_med"].lower() == record["DESCRIPTION_med"].lower() and
-            "timestamp" in r
+            r["DESCRIPTION_med"].lower() == record["DESCRIPTION_med"].lower()
         ):
+            date_str = r.get("DATE") or r.get("timestamp")
             try:
-                past_time = datetime.fromisoformat(r["timestamp"])
-                if (now - past_time).days <= 7:
-                    duplicate_flag = (
-                        f"Duplicate Dispensing detected: patient received {r['DESCRIPTION_med']} on {past_time.date()}"
-                    )
-                    break
+                past_time = datetime.fromisoformat(date_str)
             except Exception:
+                print(f"Invalid date in row: {r}")
                 continue
+
+            if (now - past_time).days <= 7:
+                duplicate_flag = (
+                    f"Duplicate Dispensing detected: patient received {r['DESCRIPTION_med']} on {past_time.date()}"
+                )
+                break
     if duplicate_flag:
         flags.append(duplicate_flag)
 
     # --- 2. Doctor Shopping ---
-    provider_set = {
-        r["PROVIDER"]
-        for r in history_df
-        if r["PATIENT_med"] == record["PATIENT_med"] and
-           r["DESCRIPTION_med"].lower() == record["DESCRIPTION_med"].lower() and
-           "timestamp" in r and (now - datetime.fromisoformat(r["timestamp"])).days <= 30
-    }
+    provider_set = set()
+    for r in history_df:
+        if not (
+            "PATIENT_med" in r and
+            "DESCRIPTION_med" in r and
+            "PROVIDER" in r and
+            ("DATE" in r or "timestamp" in r)
+        ):
+            print(f"Skipping malformed row: {r}")
+            continue
+
+        if (
+            r["PATIENT_med"] == record["PATIENT_med"] and
+            r["DESCRIPTION_med"].lower() == record["DESCRIPTION_med"].lower()
+        ):
+            date_str = r.get("DATE") or r.get("timestamp")
+            try:
+                past_time = datetime.fromisoformat(date_str)
+            except Exception:
+                print(f"Invalid date in row: {r}")
+                continue
+
+            if (now - past_time).days <= 30:
+                provider_set.add(r["PROVIDER"])
+
     if len(provider_set) >= 3:
         flags.append(
             f"Doctor Shopping detected: {len(provider_set)} unique providers prescribed {record['DESCRIPTION_med']} in the last 30 days"
