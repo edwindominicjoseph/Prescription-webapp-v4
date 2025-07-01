@@ -58,6 +58,27 @@ export default function Dashboard() {
   const [medFilter, setMedFilter] = useState('');
   const [selectedRow, setSelectedRow] = useState(null);
 
+  const handleBypass = async () => {
+    if (!selectedRow) return;
+    try {
+      const res = await fetch('http://localhost:8000/predict/bypass', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ patient_id: selectedRow.patient }),
+      });
+      if (res.ok) {
+        setRows((prev) =>
+          prev.map((r) =>
+            r.id === selectedRow.id ? { ...r, rare: true, status: 'Cleared' } : r
+          )
+        );
+        setSelectedRow(null);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const exportCsv = () => {
     const header = 'id,patient,doctor,status\n';
     const rowsData = filteredRows
@@ -85,6 +106,9 @@ export default function Dashboard() {
             risk: Math.min(5, Math.round(Number(r.risk_score) / 20)),
             doctor: r.PROVIDER,
             medication: r.DESCRIPTION_med,
+            rare: Array.isArray(r.flags)
+              ? r.flags.includes('Patient is exempted due to a known rare condition')
+              : r.flags?.includes('rare condition'),
           }))
         );
         const totalRecords = data.length;
@@ -265,13 +289,22 @@ export default function Dashboard() {
             <p className="text-sm mb-2">Patient: {selectedRow.patient}</p>
             <p className="text-sm mb-2">Doctor: {selectedRow.doctor}</p>
             <p className="text-sm mb-4">Status: {selectedRow.status}</p>
-            <button
-              type="button"
-              className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-500"
-              onClick={() => setSelectedRow(null)}
-            >
-              Close
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className="bg-yellow-600 text-white px-3 py-1 rounded-md hover:bg-yellow-500 text-xs"
+                onClick={handleBypass}
+              >
+                Bypass
+              </button>
+              <button
+                type="button"
+                className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-500 text-xs"
+                onClick={() => setSelectedRow(null)}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
