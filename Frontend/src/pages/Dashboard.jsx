@@ -10,7 +10,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import MedicationChart from '../components/MedicationChart';
+import FraudInsightsPanel from '../components/FraudInsightsPanel';
 import RiskTrendChart from '../components/RiskTrendChart';
 import FlaggedTable from '../components/FlaggedTable';
 
@@ -29,16 +29,6 @@ export default function Dashboard() {
   const [fraudPct, setFraudPct] = useState(0);
   const [fraudCount, setFraudCount] = useState(0);
   const [total, setTotal] = useState(0);
-  const [medChart, setMedChart] = useState({
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        backgroundColor: ['#fbbf24', '#60a5fa', '#34d399', '#f472b6', '#a78bfa'],
-        borderWidth: 0,
-      },
-    ],
-  });
   const [trendChart, setTrendChart] = useState({
     labels: [],
     datasets: [
@@ -55,7 +45,6 @@ export default function Dashboard() {
   const [lastUpdated, setLastUpdated] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [search, setSearch] = useState('');
-  const [medFilter, setMedFilter] = useState('');
   const [selectedRow, setSelectedRow] = useState(null);
 
   const handleBypass = async () => {
@@ -121,32 +110,7 @@ export default function Dashboard() {
           totalRecords ? Math.round((fraudRecords / totalRecords) * 100) : 0
         );
 
-        const medCounts = {};
-        data.forEach((d) => {
-          const med = d.DESCRIPTION_med;
-          if (med) {
-            medCounts[med] = (medCounts[med] || 0) + 1;
-          }
-        });
-        const sorted = Object.entries(medCounts)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5);
-        const labels = sorted.map(([m]) => m);
-        const counts = sorted.map(([, c]) => c);
-        setMedChart((prev) => ({
-          ...prev,
-          labels,
-          datasets: [
-            {
-              ...prev.datasets[0],
-              data: counts,
-              backgroundColor: prev.datasets[0].backgroundColor.slice(
-                0,
-                labels.length
-              ),
-            },
-          ],
-        }));
+
 
         const sortedRows = [...data]
           .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
@@ -193,12 +157,11 @@ export default function Dashboard() {
   const filteredRows = useMemo(() => {
     return rows
       .filter((r) => (statusFilter === 'All' ? true : r.status === statusFilter))
-      .filter((r) => (medFilter ? r.medication === medFilter : true))
       .filter((r) =>
         r.id.toLowerCase().includes(search.toLowerCase()) ||
         r.patient.toLowerCase().includes(search.toLowerCase())
       );
-  }, [rows, statusFilter, search, medFilter]);
+  }, [rows, statusFilter, search]);
 
   return (
     <div className="space-y-6">
@@ -241,13 +204,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Fraud Medications */}
-          <div className="bg-gray-800 p-4 rounded-lg">
-            <h3 className="font-semibold mb-4" style={{ color: '#2F5597' }}>
-              Fraud Medications
-            </h3>
-            <MedicationChart data={medChart} onSelect={(m) => setMedFilter(m)} />
-          </div>
+          {/* Fraud Insights */}
+          <FraudInsightsPanel />
 
           {/* Risk Trend */}
           <div className="bg-gray-800 p-4 rounded-lg">
