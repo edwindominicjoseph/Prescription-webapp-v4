@@ -76,6 +76,9 @@ def predict(input_data: FraudInput):
                 break
     if duplicate_flag:
         flags.append(duplicate_flag)
+        # mark as fraudulent when duplicate dispensing is found
+        result["fraud"] = True
+        record["fraud"] = True
 
     # --- 2. Doctor Shopping ---
     provider_set = set()
