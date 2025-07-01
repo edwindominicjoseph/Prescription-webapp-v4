@@ -57,7 +57,7 @@ export default function FlaggedTable({ rows, statusFilter, onStatusChange, searc
                   <span
                     className={`inline-block w-[80px] py-1 px-3 text-xs font-semibold text-center rounded-full text-white transition-colors duration-500 ${
                       row.rare || row.status === 'Rare condition'
-                        ? 'bg-yellow-600'
+                        ? 'bg-orange-500'
                         : row.status === 'Flagged'
                         ? 'bg-red-600'
                         : row.status === 'Cleared'

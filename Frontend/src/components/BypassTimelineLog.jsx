@@ -41,9 +41,12 @@ export default function BypassTimelineLog({ data }) {
           <ul className="relative border-l border-gray-600 ml-2 pl-4 space-y-2">
             {filtered.map((item, idx) => {
               const date = format(new Date(item.timestamp), 'MMM d');
-              const rxId = `RX${String(idx + 1).padStart(3, '0')}`;
-              const details = item.PROVIDER
-                ? `Bypassed by ${item.PROVIDER} for ${item.PATIENT_med}`
+              const rxId = item.rx_id ?? `RX${String(idx + 1).padStart(3, '0')}`;
+              const provider = item.doctor ?? item.PROVIDER;
+              const patient = item.patient ?? item.PATIENT_med;
+              const medication = item.medication ?? item.DESCRIPTION_med;
+              const details = provider
+                ? `Bypassed by ${provider} for ${patient}`
                 : 'Bypassed (RARE)';
               return (
                 <li key={idx} className="relative">
@@ -51,7 +54,7 @@ export default function BypassTimelineLog({ data }) {
                   <span className="mr-2">{date}</span>
                   <span className="text-yellow-400">&#9679;</span>{' '}
                   <span className="font-semibold">{rxId}</span> - {details}
-                  {item.DESCRIPTION_med ? ` - ${item.DESCRIPTION_med}` : ''}
+                  {medication ? ` - ${medication}` : ''}
                 </li>
               );
             })}
