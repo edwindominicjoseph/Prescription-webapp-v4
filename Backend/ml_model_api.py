@@ -3,7 +3,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import shap
-from fastapi import FastAPI
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sklearn.ensemble import IsolationForest
@@ -11,7 +10,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
 
-app = FastAPI()
 
 # Load enhanced dataset
 DATA_PATH = Path(__file__).parent / "data" / "Fullcover_merged_with_dates_Enhanced_sample.csv"
@@ -123,7 +121,6 @@ class FraudInput(BaseModel):
     TOTALCOST: float
     PATIENT_med: str
 
-@app.post("/predict")
 def predict_fraud(input: FraudInput):
     entry = input.dict()
     entry["PATIENT_ID"] = entry["PATIENT_med"]
