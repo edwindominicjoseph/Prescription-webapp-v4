@@ -47,7 +47,6 @@ export default function Dashboard() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [selectedRow, setSelectedRow] = useState(null);
-  const [bypassHistory, setBypassHistory] = useState([]);
 
   const handleBypass = async () => {
     if (!selectedRow) return;
@@ -69,10 +68,6 @@ export default function Dashboard() {
         )
       );
       setSelectedRow(null);
-      fetch('http://localhost:8000/bypass-logs')
-        .then((res) => res.json())
-        .then((items) => setBypassHistory(items))
-        .catch((err) => console.error(err));
     } catch (err) {
       console.error(err);
     }
@@ -145,12 +140,6 @@ export default function Dashboard() {
       .catch((err) => console.error(err));
   }, []);
 
-  useEffect(() => {
-    fetch('http://localhost:8000/bypass-logs')
-      .then((res) => res.json())
-      .then((items) => setBypassHistory(items))
-      .catch((err) => console.error(err));
-  }, []);
 
   const donutFraudData = {
     labels: ['Fraud', 'Other'],
@@ -246,7 +235,7 @@ export default function Dashboard() {
             onSearchChange={setSearch}
             onReview={(r) => setSelectedRow(r)}
           />
-          <BypassTimelineLog data={bypassHistory} />
+          <BypassTimelineLog />
         </div>
       </div>
       <button
