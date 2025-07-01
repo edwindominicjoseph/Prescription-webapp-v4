@@ -7,10 +7,11 @@ import {
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Tooltip,
   Legend,
 } from 'chart.js';
-import MedicationChart from '../components/MedicationChart';
+import FraudMedsBarChart from '../components/FraudMedsBarChart';
 import RiskTrendChart from '../components/RiskTrendChart';
 import FlaggedTable from '../components/FlaggedTable';
 
@@ -20,6 +21,7 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Tooltip,
   Legend
 );
@@ -29,12 +31,12 @@ export default function Dashboard() {
   const [fraudPct, setFraudPct] = useState(0);
   const [fraudCount, setFraudCount] = useState(0);
   const [total, setTotal] = useState(0);
-  const [medChart, setMedChart] = useState({
+  const [fraudBarChart, setFraudBarChart] = useState({
     labels: [],
     datasets: [
       {
         data: [],
-        backgroundColor: ['#fbbf24', '#60a5fa', '#34d399', '#f472b6', '#a78bfa'],
+        backgroundColor: '#dc2626',
         borderWidth: 0,
       },
     ],
@@ -69,7 +71,14 @@ export default function Dashboard() {
       if (res.ok) {
         setRows((prev) =>
           prev.map((r) =>
-            r.id === selectedRow.id ? { ...r, rare: true, status: 'Cleared' } : r
+            r.id === selectedRow.id
+              ? {
+                  ...r,
+                  flags: 'RC',
+                  likely_fraud: false,
+                  status: 'Cleared',
+                }
+              : r
           )
         );
         setSelectedRow(null);
@@ -102,13 +111,15 @@ export default function Dashboard() {
           data.map((r, i) => ({
             id: `RX${String(i + 1).padStart(3, '0')}`,
             patient: r.PATIENT_med,
-            status: r.fraud === 'True' || r.fraud === true ? 'Flagged' : 'Cleared',
             risk: Math.min(5, Math.round(Number(r.risk_score) / 20)),
             doctor: r.PROVIDER,
             medication: r.DESCRIPTION_med,
-            rare: Array.isArray(r.flags)
-              ? r.flags.includes('Patient is exempted due to a known rare condition')
-              : r.flags?.includes('rare condition'),
+            flags: r.flags,
+            likely_fraud: r.likely_fraud === 'True' || r.likely_fraud === true,
+            status:
+              r.likely_fraud === 'True' || r.likely_fraud === true
+                ? 'Flagged'
+                : 'Cleared',
           }))
         );
         const totalRecords = data.length;
@@ -122,28 +133,26 @@ export default function Dashboard() {
         );
 
         const medCounts = {};
-        data.forEach((d) => {
-          const med = d.DESCRIPTION_med;
-          if (med) {
-            medCounts[med] = (medCounts[med] || 0) + 1;
-          }
-        });
+        data
+          .filter((d) => d.fraud === 'True' || d.fraud === true)
+          .forEach((d) => {
+            const med = d.DESCRIPTION_med;
+            if (med) {
+              medCounts[med] = (medCounts[med] || 0) + 1;
+            }
+          });
         const sorted = Object.entries(medCounts)
           .sort((a, b) => b[1] - a[1])
-          .slice(0, 5);
+          .slice(0, 10);
         const labels = sorted.map(([m]) => m);
         const counts = sorted.map(([, c]) => c);
-        setMedChart((prev) => ({
+        setFraudBarChart((prev) => ({
           ...prev,
           labels,
           datasets: [
             {
               ...prev.datasets[0],
               data: counts,
-              backgroundColor: prev.datasets[0].backgroundColor.slice(
-                0,
-                labels.length
-              ),
             },
           ],
         }));
@@ -241,12 +250,15 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Fraud Medications */}
+          {/* Top Fraud Medications */}
           <div className="bg-gray-800 p-4 rounded-lg">
             <h3 className="font-semibold mb-4" style={{ color: '#2F5597' }}>
-              Fraud Medications
+              Top Fraud-Flagged Medications
             </h3>
-            <MedicationChart data={medChart} onSelect={(m) => setMedFilter(m)} />
+            <FraudMedsBarChart
+              data={fraudBarChart}
+              onSelect={(m) => setMedFilter(m)}
+            />
           </div>
 
           {/* Risk Trend */}

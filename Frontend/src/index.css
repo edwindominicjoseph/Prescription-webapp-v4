@@ -26,3 +26,30 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+.status-tag {
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1;
+  display: inline-block;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.status-tag.flagged {
+  background-color: #dc2626;
+  color: white;
+}
+
+.status-tag.cleared {
+  background-color: #22c55e;
+  color: white;
+}
+
+.status-tag.rare {
+  background-color: #f39c12;
+  color: white;
+}
+
