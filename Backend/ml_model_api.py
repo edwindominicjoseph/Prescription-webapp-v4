@@ -1,14 +1,8 @@
-# ml_model_api.py
-
 import os
-import random
 from pathlib import Path
-
 import numpy as np
 import pandas as pd
 import shap
-import matplotlib.pyplot as plt
-
 from fastapi import FastAPI
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
@@ -17,25 +11,14 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
 
-# --- Initialize FastAPI app ---
 app = FastAPI()
 
-# --- Load Dataset ---
-env_data_path = os.environ.get("DATA_PATH")
-if env_data_path:
-    DATA_PATH = Path(env_data_path)
-else:
-    DATA_PATH = Path(__file__).parent / "data" / "merged_Fullcover.csv"
-
-if not DATA_PATH.is_file():
-    raise FileNotFoundError(
-        f"Data file not found at {DATA_PATH}. Set DATA_PATH environment variable to override."
-    )
-
+# Load enhanced dataset
+DATA_PATH = Path(__file__).parent / "data" / "Fullcover_merged_with_dates_Enhanced_sample.csv"
 df3 = pd.read_csv(DATA_PATH)
 
-# --- Risk Lists ---
-high_risk_medications = [  "pregabalin", "gabapentin", "tapentadol", "carfentanil", "nitrazepam", "zopiclone", "zolpidem",
+# Risk classification
+high_risk_medications = ["pregabalin", "gabapentin", "tapentadol", "carfentanil", "nitrazepam", "zopiclone", "zolpidem",
     "lorazepam", "temazepam", "hydromorphone", "fentanyl", "methadone", "oxycodone", "morphine",
     "alfentanil", "hydrocodone bitartrate", "medroxyPROGESTERone acetate", "leuprolide acetate",
     "enoxaparin sodium", "docetaxel", "epinephrine", "fluorouracil", "oxaliplatin", "furosemide",
@@ -44,10 +27,9 @@ high_risk_medications = [  "pregabalin", "gabapentin", "tapentadol", "carfentani
     "Oxycodone Hydrochloride", "Codeine Phosphate", "Methadone Hydrochloride",
     "Tramadol Hydrochloride", "Meperidine Hydrochloride", "Buprenorphine / Naloxone",
     "Lorazepam", "Diazepam", "Midazolam", "Clonazepam", "Remifentanil",
-    "Nicotine Transdermal Patch", "Propofol"]  # ⬅️ Your full high risk list
+    "Nicotine Transdermal Patch", "Propofol"]
 
-
-moderate_risk_medications = [ "rivaroxaban", "dabigatran", "azathioprine", "baricitinib", "moxifloxacin", "clarithromycin",
+moderate_risk_medications = ["rivaroxaban", "dabigatran", "azathioprine", "baricitinib", "moxifloxacin", "clarithromycin",
     "erythromycin", "ondansetron", "donepezil hydrochloride", "memantine hydrochloride",
     "metformin hydrochloride", "nicotine transdermal patch", "ethinyl estradiol", "norelgestromin",
     "fluticasone propionate", "liraglutide", "norepinephrine", "alendronic acid", "amoxicillin clavulanate",
@@ -60,30 +42,28 @@ moderate_risk_medications = [ "rivaroxaban", "dabigatran", "azathioprine", "bari
     "Levora", "Natazia", "Trinessa", "Camila", "Jolivette", "Errin", "Remdesivir",
     "Heparin sodium porcine", "Alteplase", "Atropine Sulfate", "Desflurane", "Isoflurane",
     "Sevoflurane", "Rocuronium bromide", "Epoetin Alfa", "Glycopyrrolate", "Aviptadil",
-    "Leronlimab", "Lenzilumab" ]  # ⬅️ Your full moderate risk list
-
-
+    "Leronlimab", "Lenzilumab"]
 
 risk_mapping = {"Low Risk": 0, "Moderate Risk": 1, "High Risk": 2}
 
 def categorize_risk(med_name: str) -> str:
     name = med_name.lower()
-    if any(k in name for k in [m.lower() for m in high_risk_medications]):
+    if any(m in name for m in map(str.lower, high_risk_medications)):
         return "High Risk"
-    if any(k in name for k in [m.lower() for m in moderate_risk_medications]):
+    if any(m in name for m in map(str.lower, moderate_risk_medications)):
         return "Moderate Risk"
     return "Low Risk"
 
 df3["MEDICATION_RISK"] = df3["DESCRIPTION_med"].apply(categorize_risk)
 df3["MEDICATION_RISK_CODE"] = df3["MEDICATION_RISK"].map(risk_mapping)
 
-# --- Risk Classifier ---
+# Risk classifier
 vectorizer = TfidfVectorizer()
 X_vec = vectorizer.fit_transform(df3["DESCRIPTION_med"].str.lower())
 risk_classifier = LogisticRegression(max_iter=1000)
 risk_classifier.fit(X_vec, df3["MEDICATION_RISK"])
 
-# --- Label Encoders ---
+# Label encoders
 label_encoders = {}
 encoded_df = df3.copy()
 for col in [
@@ -94,19 +74,25 @@ for col in [
     encoded_df[col] = le.fit_transform(encoded_df[col])
     label_encoders[col] = le
 
-# --- General Model ---
-feature_cols = ["ENCOUNTERCLASS", "DISPENSES", "TOTALCOST", "AGE", "MEDICATION_RISK_CODE"]
+# Feature columns for general model
+feature_cols = [
+    "ENCOUNTERCLASS", "DISPENSES", "TOTALCOST", "AGE", "MEDICATION_RISK_CODE",
+    "UNIQUE_DOCTOR_COUNT", "TIME_SINCE_LAST", "HIGH_RISK_COUNT"
+]
+
+# General model
 general_model = IsolationForest(contamination=0.05, random_state=42)
 general_model.fit(encoded_df[feature_cols])
 general_min, general_max = general_model.decision_function(encoded_df[feature_cols]).min(), general_model.decision_function(encoded_df[feature_cols]).max()
 
-# --- Patient History Model ---
+# Delta model
 patient_history = (
     df3.groupby("PATIENT_med")
     .agg({"BASE_COST": "mean", "TOTALCOST": "mean", "DISPENSES": "mean", "AGE": "first"})
     .reset_index()
     .rename(columns={"PATIENT_med": "PATIENT_ID"})
 )
+
 delta_data = df3[["PATIENT_med", "BASE_COST", "TOTALCOST", "DISPENSES"]].merge(
     patient_history, left_on="PATIENT_med", right_on="PATIENT_ID", suffixes=("", "_avg")
 )
@@ -122,7 +108,6 @@ delta_min, delta_max = delta_model.decision_function(delta_features).min(), delt
 explainer_general = shap.Explainer(general_model, encoded_df[feature_cols])
 explainer_delta = shap.Explainer(delta_model, delta_features)
 
-# --- Input Schema ---
 class FraudInput(BaseModel):
     DESCRIPTION_med: str
     ENCOUNTERCLASS: str
@@ -138,12 +123,11 @@ class FraudInput(BaseModel):
     TOTALCOST: float
     PATIENT_med: str
 
-# --- API Endpoint ---
 @app.post("/predict")
 def predict_fraud(input: FraudInput):
     entry = input.dict()
-    med_vec = vectorizer.transform([entry["DESCRIPTION_med"].lower()])
-    risk_category = risk_classifier.predict(med_vec)[0]
+    entry["PATIENT_ID"] = entry["PATIENT_med"]
+    risk_category = risk_classifier.predict(vectorizer.transform([entry["DESCRIPTION_med"].lower()]))[0]
     entry["MEDICATION_RISK_CODE"] = risk_mapping[risk_category]
 
     for col in label_encoders:
@@ -155,8 +139,16 @@ def predict_fraud(input: FraudInput):
                 le.classes_ = np.append(le.classes_, entry[col])
                 entry[col] = le.transform([entry[col]])[0]
 
-    entry["PATIENT_ID"] = entry.get("PATIENT_med", entry.get("PATIENT_ID"))
-    shap_input = None
+    match = df3[df3["PATIENT_med"] == entry["PATIENT_ID"]]
+    if not match.empty:
+        latest = match.sort_values("DISPENSE_DATE", ascending=False).iloc[0]
+        entry["UNIQUE_DOCTOR_COUNT"] = latest.get("UNIQUE_DOCTOR_COUNT", 1)
+        entry["TIME_SINCE_LAST"] = latest.get("TIME_SINCE_LAST", 0)
+        entry["HIGH_RISK_COUNT"] = latest.get("HIGH_RISK_COUNT", 0)
+    else:
+        entry["UNIQUE_DOCTOR_COUNT"] = 1
+        entry["TIME_SINCE_LAST"] = 0
+        entry["HIGH_RISK_COUNT"] = 0
 
     matched = patient_history[patient_history["PATIENT_ID"] == entry["PATIENT_ID"]]
     if not matched.empty:
@@ -179,18 +171,14 @@ def predict_fraud(input: FraudInput):
         shap_values = explainer_general(entry_df[feature_cols])
         shap_input = entry_df[feature_cols]
 
-    shap_features = {
-        k: (float(v) if isinstance(v, (np.floating, np.integer)) else v)
-        for k, v in shap_input.to_dict(orient="records")[0].items()
-    }
-    shap_values_list = [float(v) for v in shap_values.values[0].tolist()]
-
-    result = {
+    return jsonable_encoder({
         "fraud": bool(score < 0),
-        "risk_score": int(norm_score),
+        "risk_score": norm_score,
         "medication_risk": risk_category,
         "used_model": model_type,
-        "shap_features": shap_features,
-        "shap_values": shap_values_list,
-    }
-    return jsonable_encoder(result)
+        "shap_features": shap_input.to_dict(orient="records")[0],
+        "shap_values": shap_values.values[0].tolist(),
+        "HIGH_RISK_COUNT": entry["HIGH_RISK_COUNT"],
+        "UNIQUE_DOCTOR_COUNT": entry["UNIQUE_DOCTOR_COUNT"],
+        "TIME_SINCE_LAST": entry["TIME_SINCE_LAST"]
+    })
