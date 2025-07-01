@@ -51,9 +51,9 @@ export default function MiniFraudFeed() {
     });
   };
 
-  const fraudColor = type => {
-    if (type.includes('Duplicate')) return 'bg-red-600';
-    if (type.includes('Rare')) return 'bg-yellow-500';
+  const fraudColor = (type = '') => {
+    if (type?.includes('Duplicate')) return 'bg-red-600';
+    if (type?.includes('Rare')) return 'bg-yellow-500';
     return 'bg-orange-500';
   };
 
@@ -76,7 +76,7 @@ export default function MiniFraudFeed() {
               item.FRAUD_TYPE,
             )}`}
           >
-            {item.FRAUD_TYPE}
+            {item.FRAUD_TYPE || 'Unknown'}
           </span>
           <div className="mt-2 text-sm">
             <span className="mr-1">👨‍⚕️</span>
