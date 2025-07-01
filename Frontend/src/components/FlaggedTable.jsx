@@ -55,9 +55,18 @@ export default function FlaggedTable({ rows, statusFilter, onStatusChange, searc
                 <td className="py-2">{row.patient}</td>
                 <td className="py-2">
                   <span
-                    className={`px-2 py-0.5 text-xs rounded-full ${row.rare ? 'bg-yellow-600 text-white' : row.status==='Flagged' ? 'bg-red-600 text-white' : 'bg-green-500 text-white'}`}
+                    className={`inline-block w-[80px] py-1 px-3 text-xs font-semibold text-center rounded-full text-white transition-colors duration-500 ${
+                      row.rare || row.status === 'Rare condition'
+                        ? 'bg-yellow-600'
+                        : row.status === 'Flagged'
+                        ? 'bg-red-600'
+                        : row.status === 'Cleared'
+                        ? 'bg-green-500'
+                        : 'bg-gray-500'
+                    }`}
+                    title={row.rare ? 'Rare condition' : row.status}
                   >
-                    {row.rare ? 'Rare condition' : row.status}
+                    {row.rare || row.status === 'Rare condition' ? 'RARE' : row.status}
                   </span>
                 </td>
                 <td className="py-2" title={`${row.risk} out of 5 risk level`}>
