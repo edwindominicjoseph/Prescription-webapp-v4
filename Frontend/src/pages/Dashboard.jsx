@@ -246,6 +246,7 @@ export default function Dashboard() {
             </h4>
             <p className="text-sm mb-2">Patient: {selectedRow.patient}</p>
             <p className="text-sm mb-2">Doctor: {selectedRow.doctor}</p>
+            <p className="text-sm mb-2">Medication: {selectedRow.medication}</p>
             <p className="text-sm mb-4">Status: {selectedRow.status}</p>
             <div className="flex gap-2">
               <button
