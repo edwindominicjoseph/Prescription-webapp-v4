@@ -1,16 +1,26 @@
 import PropTypes from 'prop-types';
 import { useMemo } from 'react';
-import { Star, AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
+import PillBadge from './PillBadge';
+import RiskStars from './RiskStars';
 
-export default function FlaggedTable({ rows, statusFilter, onStatusChange, search, onSearchChange, onReview }) {
+export default function FlaggedTable({ rows, statusFilter, onStatusChange, search, onSearchChange, onReview, sortField, onSortChange }) {
   const filtered = useMemo(() => {
-    return rows
+    const base = rows
       .filter(r => (statusFilter === 'All' ? true : r.status === statusFilter))
       .filter(r =>
         r.id.toLowerCase().includes(search.toLowerCase()) ||
         r.patient.toLowerCase().includes(search.toLowerCase())
       );
-  }, [rows, statusFilter, search]);
+    if (!sortField) return base;
+    const sorted = [...base].sort((a, b) => {
+      if (sortField === 'risk') return b.risk - a.risk;
+      if (sortField === 'doctor') return a.doctor.localeCompare(b.doctor);
+      if (sortField === 'time') return new Date(b.timestamp) - new Date(a.timestamp);
+      return 0;
+    });
+    return sorted;
+  }, [rows, statusFilter, search, sortField]);
 
   return (
     <div className="space-y-3">
@@ -42,9 +52,16 @@ export default function FlaggedTable({ rows, statusFilter, onStatusChange, searc
               <th className="py-2">Prescription ID</th>
               <th className="py-2">Patient</th>
               <th className="py-2">Status</th>
-              <th className="py-2">Fraud Risk</th>
+              <th className="py-2">
+                <button type="button" onClick={() => onSortChange('risk')}>Fraud Risk</button>
+              </th>
               <th className="py-2">Flag</th>
-              <th className="py-2">Doctor</th>
+              <th className="py-2">
+                <button type="button" onClick={() => onSortChange('doctor')}>Doctor</button>
+              </th>
+              <th className="py-2">
+                <button type="button" onClick={() => onSortChange('time')}>Time</button>
+              </th>
               <th className="py-2" />
             </tr>
           </thead>
@@ -54,23 +71,16 @@ export default function FlaggedTable({ rows, statusFilter, onStatusChange, searc
                 <td className="py-2 font-medium">{row.id}</td>
                 <td className="py-2">{row.patient}</td>
                 <td className="py-2">
-                  {row.flags?.includes('RC') ? (
-                    <span className="status-tag rare">RC</span>
-                  ) : row.likely_fraud ? (
-                    <span className="status-tag flagged">Flagged</span>
-                  ) : (
-                    <span className="status-tag cleared">Cleared</span>
-                  )}
+                  <PillBadge label={row.status} />
                 </td>
                 <td className="py-2" title={`${row.risk} out of 5 risk level`}>
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className={`w-4 h-4 inline ${i < row.risk ? 'text-yellow-400' : 'text-gray-400'}`} />
-                  ))}
+                  <RiskStars score={row.risk} />
                 </td>
                 <td className="py-2">
                   {row.status==='Flagged' && <AlertTriangle className="text-red-600 w-5 h-5" title="Flagged due to high dose" />}
                 </td>
                 <td className="py-2">{row.doctor}</td>
+                <td className="py-2">{new Date(row.timestamp).toLocaleString()}</td>
                 <td className="py-2">
                   <button
                     type="button"
@@ -96,4 +106,11 @@ FlaggedTable.propTypes = {
   search: PropTypes.string.isRequired,
   onSearchChange: PropTypes.func.isRequired,
   onReview: PropTypes.func.isRequired,
+  sortField: PropTypes.string,
+  onSortChange: PropTypes.func,
+};
+
+FlaggedTable.defaultProps = {
+  sortField: null,
+  onSortChange: () => {},
 };

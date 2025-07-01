@@ -68,6 +68,7 @@ GET /user/...             (Optional) User routes
 ✅ Dual Isolation Forests (general + patient-specific)
 ✅ SHAP-based feature importance visualization
 ✅ Streamlined UI with TailwindCSS and React Router
+✅ Enhanced dashboard at `/enhanced` demonstrating KPI cards, charts and framer-motion animations
 ✅ Secure CORS connection between frontend-backend
 ✅ Predictions logged to `Backend/predictions.csv`
 
