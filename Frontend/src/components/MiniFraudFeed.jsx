@@ -8,9 +8,24 @@ export default function MiniFraudFeed() {
 
   useEffect(() => {
     axios
-      .get('/api/recent-fraud-predictions')
+      .get('http://localhost:8000/predict/history')
       .then(res => {
-        setItems(res.data.slice(0, 5));
+        const list = Array.isArray(res.data) ? res.data : [];
+        const sorted = list
+          .filter(
+            r =>
+              r.fraud === 'True' ||
+              r.fraud === true ||
+              r.likely_fraud === 'True' ||
+              r.likely_fraud === true,
+          )
+          .sort(
+            (a, b) =>
+              new Date(b.timestamp || b.prediction_time) -
+              new Date(a.timestamp || a.prediction_time),
+          )
+          .slice(0, 5);
+        setItems(sorted);
         setLoading(false);
       })
       .catch(() => {
@@ -65,10 +80,10 @@ export default function MiniFraudFeed() {
           </span>
           <div className="mt-2 text-sm">
             <span className="mr-1">👨‍⚕️</span>
-            {item.DOCTOR_med} - {item.ORG_med}
+            {item.PROVIDER} - {item.ORGANIZATION}
           </div>
           <div className="text-xs mt-1">
-            🕒 {formatDate(item.prediction_time)}
+            🕒 {formatDate(item.timestamp || item.prediction_time)}
           </div>
           <span
             className={`mt-2 inline-block px-2 py-1 text-xs font-semibold rounded-full ${scoreColor(

@@ -13,6 +13,7 @@ import {
 import FraudInsightsPanel from '../components/FraudInsightsPanel';
 import RiskTrendChart from '../components/RiskTrendChart';
 import FlaggedTable from '../components/FlaggedTable';
+import MiniFraudFeed from '../components/MiniFraudFeed';
 
 ChartJS.register(
   ArcElement,
@@ -229,6 +230,10 @@ export default function Dashboard() {
             onSearchChange={setSearch}
             onReview={(r) => setSelectedRow(r)}
           />
+          <h3 className="font-semibold" style={{ color: '#2F5597' }}>
+            Recent Fraud Cases
+          </h3>
+          <MiniFraudFeed />
         </div>
       </div>
       <button
