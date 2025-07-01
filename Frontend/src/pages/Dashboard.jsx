@@ -60,12 +60,12 @@ export default function Dashboard() {
           patient: selectedRow.patient,
           doctor: selectedRow.doctor,
           medication: selectedRow.medication,
-          status: selectedRow.status,
+          status: 'RARE',
         }),
       });
       setRows((prev) =>
         prev.map((r) =>
-          r.id === selectedRow.id ? { ...r, status: 'Cleared' } : r
+          r.id === selectedRow.id ? { ...r, status: 'RARE' } : r
         )
       );
       setSelectedRow(null);
