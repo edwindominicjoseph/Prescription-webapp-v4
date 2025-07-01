@@ -13,7 +13,7 @@ import {
 import FraudInsightsPanel from '../components/FraudInsightsPanel';
 import RiskTrendChart from '../components/RiskTrendChart';
 import FlaggedTable from '../components/FlaggedTable';
-import BypassTimeline from '../components/BypassTimeline';
+import BypassTimelineLog from '../components/BypassTimelineLog';
 
 ChartJS.register(
   ArcElement,
@@ -238,7 +238,7 @@ export default function Dashboard() {
             onSearchChange={setSearch}
             onReview={(r) => setSelectedRow(r)}
           />
-          <BypassTimeline data={bypassHistory} />
+          <BypassTimelineLog data={bypassHistory} />
         </div>
       </div>
       <button
