@@ -36,8 +36,10 @@ export default function Dashboard() {
     datasets: [
       {
         data: [],
-        backgroundColor: '#dc2626',
+        backgroundColor: [],
         borderWidth: 0,
+        avgRisk: [],
+        doctor: [],
       },
     ],
   });
@@ -132,30 +134,48 @@ export default function Dashboard() {
           totalRecords ? Math.round((fraudRecords / totalRecords) * 100) : 0
         );
 
-        const medCounts = {};
+        const medStats = {};
         data
           .filter((d) => d.fraud === 'True' || d.fraud === true)
           .forEach((d) => {
             const med = d.DESCRIPTION_med;
-            if (med) {
-              medCounts[med] = (medCounts[med] || 0) + 1;
+            if (!med) return;
+            const risk = Number(d.risk_score) || 0;
+            const doctor = d.PROVIDER;
+            if (!medStats[med]) {
+              medStats[med] = { count: 0, totalRisk: 0, doctorCounts: {} };
             }
+            medStats[med].count += 1;
+            medStats[med].totalRisk += risk;
+            medStats[med].doctorCounts[doctor] =
+              (medStats[med].doctorCounts[doctor] || 0) + 1;
           });
-        const sorted = Object.entries(medCounts)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 10);
+        const sorted = Object.entries(medStats)
+          .sort((a, b) => b[1].count - a[1].count)
+          .slice(0, 5);
         const labels = sorted.map(([m]) => m);
-        const counts = sorted.map(([, c]) => c);
-        setFraudBarChart((prev) => ({
-          ...prev,
+        const counts = sorted.map(([, s]) => s.count);
+        const avgRisk = sorted.map(([, s]) => (s.totalRisk / s.count).toFixed(1));
+        const doctors = sorted.map(([, s]) =>
+          Object.entries(s.doctorCounts).sort((a, b) => b[1] - a[1])[0][0]
+        );
+        const colors = counts.map((c) => {
+          if (c >= 10) return '#dc2626';
+          if (c >= 5) return '#f97316';
+          return '#facc15';
+        });
+        setFraudBarChart({
           labels,
           datasets: [
             {
-              ...prev.datasets[0],
               data: counts,
+              backgroundColor: colors,
+              borderWidth: 0,
+              avgRisk,
+              doctor: doctors,
             },
           ],
-        }));
+        });
 
         const sortedRows = [...data]
           .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
