@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import {
   ArrowUpRight,
   AlertTriangle,
@@ -72,23 +71,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const kpiIcons = [FlaskConical, TrendingUp, CheckCircle];
 
-  const [fraudCount, setFraudCount] = useState(0);
-  const [fraudIncrease, setFraudIncrease] = useState(0);
-  const [detectionRate, setDetectionRate] = useState(0);
-
-  useEffect(() => {
-    axios.get('/monthly-metrics').then((res) => {
-      setFraudCount(res.data.total_fraud);
-      setFraudIncrease(res.data.fraud_increase);
-      setDetectionRate(res.data.detection_rate);
-      setKpis((prev) => [
-        { ...prev[0], value: res.data.total_fraud },
-        { ...prev[1], value: res.data.fraud_increase },
-        { ...prev[2], value: `${res.data.detection_rate}%` },
-      ]);
-    });
-  }, []);
-
   useEffect(() => {
     fetch('http://localhost:8000/predict/history')
       .then((res) => res.json())
@@ -103,6 +85,19 @@ export default function Home() {
           }))
         );
 
+        const fraudCount = data.filter((r) => r.fraud === 'True' || r.fraud === true).length;
+        const month = new Date().getMonth();
+        const monthlyFraud = data.filter(
+          (r) => new Date(r.timestamp).getMonth() === month && (r.fraud === 'True' || r.fraud === true)
+        ).length;
+        const total = data.length;
+        const detection = total ? Math.round((fraudCount / total) * 100) : 0;
+
+        setKpis((prev) => [
+          { ...prev[0], value: fraudCount },
+          { ...prev[1], value: monthlyFraud },
+          { ...prev[2], value: `${detection}%` },
+        ]);
 
         const medCounts = {};
         data.forEach((r) => {
