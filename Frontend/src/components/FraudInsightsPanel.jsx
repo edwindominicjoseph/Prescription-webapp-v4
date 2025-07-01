@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import Papa from 'papaparse';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -17,11 +16,12 @@ export default function FraudInsightsPanel() {
   const [view, setView] = useState('medications');
 
   useEffect(() => {
-    fetch('/Backend/predictions.csv')
-      .then(res => res.text())
-      .then(text => {
-        const parsed = Papa.parse(text, { header: true }).data;
-        const flagged = parsed.filter(r => r.fraud === 'True' || r.fraud === true);
+    fetch('http://localhost:8000/predict/history')
+      .then(res => res.json())
+      .then(list => {
+        const flagged = list.filter(
+          r => r.likely_fraud === 'True' || r.likely_fraud === true
+        );
         const countTop = field => {
           const map = {};
           flagged.forEach(r => {
@@ -32,12 +32,22 @@ export default function FraudInsightsPanel() {
             .sort((a, b) => b[1] - a[1])
             .slice(0, 5);
         };
-        setData({
+        setData(prev => ({
+          ...prev,
           medications: countTop('DESCRIPTION_med'),
           doctors: countTop('PROVIDER'),
-          providers: countTop('ORGANIZATION'),
-        });
+        }));
       })
+      .catch(err => console.error(err));
+
+    fetch('http://localhost:8000/analytics/top_providers')
+      .then(res => res.json())
+      .then(items =>
+        setData(prev => ({
+          ...prev,
+          providers: items.map(i => [i.Provider_med, i.count]),
+        }))
+      )
       .catch(err => console.error(err));
   }, []);
 
