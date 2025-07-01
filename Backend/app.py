@@ -34,6 +34,8 @@ def bypass_prescription(entry: dict):
     from datetime import datetime
 
     entry["timestamp"] = datetime.now().isoformat()
+    # Ensure bypassed items are logged with status RARE
+    entry["status"] = "RARE"
 
     bypass_file = Path(__file__).parent / "bypass_log.csv"
 
