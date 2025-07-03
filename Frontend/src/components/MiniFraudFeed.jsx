@@ -65,13 +65,15 @@ export default function MiniFraudFeed() {
           className="bg-[#374151] text-white rounded p-3 hover:bg-[#4b5563] mb-3"
         >
           <div className="font-bold mb-1">{item.DESCRIPTION_med}</div>
-          <span
-            className={`text-xs px-2 py-1 rounded ${fraudColor(
-              item.FRAUD_TYPE,
-            )}`}
-          >
-            {item.FRAUD_TYPE || 'Unknown'}
-          </span>
+          {item.FRAUD_TYPE && item.FRAUD_TYPE !== 'Unknown' && (
+            <span
+              className={`text-xs px-2 py-1 rounded ${fraudColor(
+                item.FRAUD_TYPE,
+              )}`}
+            >
+              {item.FRAUD_TYPE}
+            </span>
+          )}
           <div className="mt-2 text-sm">
             <span className="mr-1">👨‍⚕️</span>
             {item.PROVIDER} - {item.ORGANIZATION}
