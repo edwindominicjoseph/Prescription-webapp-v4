@@ -11,6 +11,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Star, AlertTriangle } from 'lucide-react';
+import StatusBadge from '../components/StatusBadge.jsx';
 
 ChartJS.register(
   ArcElement,
@@ -59,7 +60,7 @@ export default function Dashboard() {
           data.map((r, i) => ({
             id: `RX${String(i + 1).padStart(3, '0')}`,
             patient: r.PATIENT_med,
-            status: r.fraud === 'True' || r.fraud === true ? 'Flagged' : 'Cleared',
+            flag_status: r.fraud === 'True' || r.fraud === true ? 'Flagged' : 'Cleared',
             risk: Math.min(5, Math.round(Number(r.risk_score) / 20)),
             doctor: r.PROVIDER,
           }))
@@ -253,9 +254,7 @@ export default function Dashboard() {
                     <td className="py-2 font-medium">{row.id}</td>
                     <td className="py-2">{row.patient}</td>
                     <td className="py-2">
-                      <span className={row.status === 'Flagged' ? 'text-red-500' : 'text-green-500'}>
-                        {row.status}
-                      </span>
+                      <StatusBadge flag_status={row.flag_status} />
                     </td>
                     <td className="py-2">
                       {Array.from({ length: 5 }).map((_, i) => (
@@ -266,7 +265,7 @@ export default function Dashboard() {
                       ))}
                     </td>
                     <td className="py-2">
-                      {row.status === 'Flagged' && (
+                      {row.flag_status === 'Flagged' && (
                         <AlertTriangle className="text-red-600 w-5 h-5" />
                       )}
                     </td>
