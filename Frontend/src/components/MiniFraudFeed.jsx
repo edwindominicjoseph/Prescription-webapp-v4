@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import dayjs from 'dayjs';
 
 export default function MiniFraudFeed() {
   const [items, setItems] = useState([]);
@@ -42,14 +43,7 @@ export default function MiniFraudFeed() {
     return <div className="text-red-500">{error}</div>;
   }
 
-  const formatDate = ts => {
-    const date = new Date(ts);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: '2-digit',
-      year: 'numeric',
-    });
-  };
+  const formatDate = ts => dayjs(ts).format('MMM DD, YYYY, h:mm A');
 
   const fraudColor = (type = '') => {
     if (type?.includes('Duplicate')) return 'bg-red-600';
@@ -81,6 +75,19 @@ export default function MiniFraudFeed() {
           <div className="mt-2 text-sm">
             <span className="mr-1">👨‍⚕️</span>
             {item.PROVIDER} - {item.ORGANIZATION}
+          </div>
+          <div className="mt-1">
+            <span
+              className={`px-2 py-1 text-xs rounded ${
+                !item.flag_status || item.flag_status === 'Unknown'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-gray-600 text-white'
+              }`}
+            >
+              {!item.flag_status || item.flag_status === 'Unknown'
+                ? 'Flagged'
+                : item.flag_status}
+            </span>
           </div>
           <div className="text-xs mt-1">
             🕒 {formatDate(item.timestamp || item.prediction_time)}
