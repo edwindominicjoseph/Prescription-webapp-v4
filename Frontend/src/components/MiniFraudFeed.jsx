@@ -54,11 +54,11 @@ export default function MiniFraudFeed() {
     return 'bg-orange-500';
   };
 
-  const flagColor = (status = '') => {
+  const statusColor = status => {
     if (status === 'Flagged') return 'bg-red-600';
-    if (status === 'Cleared') return 'bg-green-500';
-    if (status === 'Rare' || status === 'Rare condition') return 'bg-yellow-600';
-    return 'bg-gray-500';
+    if (status === 'Cleared') return 'bg-green-600';
+    if (status === 'RARE') return 'bg-yellow-400 text-black';
+    return '';
   };
 
   const scoreColor = score => {
@@ -82,13 +82,15 @@ export default function MiniFraudFeed() {
           >
             {item.FRAUD_TYPE || 'Unknown'}
           </span>
-          <span
-            className={`ml-2 text-xs px-2 py-1 rounded ${flagColor(
-              item.flag_status,
-            )}`}
-          >
-            {item.flag_status?.trim() ? item.flag_status : 'Unknown'}
-          </span>
+          {statusColor(item.flag_status) && (
+            <span
+              className={`ml-2 text-xs px-2 py-1 rounded ${statusColor(
+                item.flag_status,
+              )}`}
+            >
+              {item.flag_status}
+            </span>
+          )}
           <div className="mt-2 text-sm">
             <span className="mr-1">👨‍⚕️</span>
             {item.PROVIDER} - {item.ORGANIZATION}
