@@ -239,7 +239,7 @@ export default function Dashboard() {
       <button
         type="button"
         onClick={exportCsv}
-        className="fixed bottom-6 right-6 bg-green-600 text-white p-3 rounded-full shadow hover:bg-green-500"
+        className="fixed bottom-4 left-4 bg-green-600 text-white p-3 rounded-full shadow hover:bg-green-500"
       >
         Export
       </button>
