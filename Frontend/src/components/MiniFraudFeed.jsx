@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(relativeTime);
 
 export default function MiniFraudFeed() {
   const [items, setItems] = useState([]);
@@ -42,19 +46,19 @@ export default function MiniFraudFeed() {
     return <div className="text-red-500">{error}</div>;
   }
 
-  const formatDate = ts => {
-    const date = new Date(ts);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: '2-digit',
-      year: 'numeric',
-    });
-  };
+  const formatDate = ts => dayjs(ts).fromNow();
 
   const fraudColor = (type = '') => {
     if (type?.includes('Duplicate')) return 'bg-red-600';
     if (type?.includes('Rare')) return 'bg-yellow-500';
     return 'bg-orange-500';
+  };
+
+  const flagColor = (status = '') => {
+    if (status === 'Flagged') return 'bg-red-600';
+    if (status === 'Cleared') return 'bg-green-500';
+    if (status === 'Rare' || status === 'Rare condition') return 'bg-yellow-600';
+    return 'bg-gray-500';
   };
 
   const scoreColor = score => {
@@ -77,6 +81,13 @@ export default function MiniFraudFeed() {
             )}`}
           >
             {item.FRAUD_TYPE || 'Unknown'}
+          </span>
+          <span
+            className={`ml-2 text-xs px-2 py-1 rounded ${flagColor(
+              item.flag_status,
+            )}`}
+          >
+            {item.flag_status?.trim() ? item.flag_status : 'Unknown'}
           </span>
           <div className="mt-2 text-sm">
             <span className="mr-1">👨‍⚕️</span>
