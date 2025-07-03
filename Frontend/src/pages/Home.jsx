@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowUpRight, AlertTriangle, UserCircle, Star } from 'lucide-react';
+import StatusBadge from '../components/StatusBadge.jsx';
 import { Doughnut, Line } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend } from 'chart.js';
 
@@ -66,7 +67,7 @@ export default function Home() {
           data.map((r, i) => ({
             id: `RX${String(i + 1).padStart(3, '0')}`,
             patient: r.PATIENT_med,
-            status: r.fraud === 'True' ? 'Flagged' : 'Cleared',
+            flag_status: r.fraud === 'True' ? 'Flagged' : 'Cleared',
             risk: Math.min(5, Math.round(Number(r.risk_score) / 20)),
             doctor: r.PROVIDER,
           }))
@@ -180,9 +181,7 @@ export default function Home() {
                 <td className="py-2 font-medium">{row.id}</td>
                 <td className="py-2">{row.patient}</td>
                 <td className="py-2">
-                  <span className={row.status === 'Flagged' ? 'text-red-600' : 'text-green-600'}>
-                    {row.status}
-                  </span>
+                  <StatusBadge flag_status={row.flag_status} />
                 </td>
                 <td className="py-2">
                   {Array.from({ length: 5 }).map((_, i) => (
@@ -190,7 +189,9 @@ export default function Home() {
                   ))}
                 </td>
                 <td className="py-2">
-                  {row.status === 'Flagged' && <AlertTriangle className="text-red-600 w-5 h-5" />}
+                  {row.flag_status === 'Flagged' && (
+                    <AlertTriangle className="text-red-600 w-5 h-5" />
+                  )}
                 </td>
                 <td className="py-2 flex items-center gap-1">
                   <UserCircle className="w-5 h-5 text-gray-400" /> {row.doctor}
