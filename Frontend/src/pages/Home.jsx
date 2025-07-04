@@ -11,6 +11,8 @@ import {
 import { Link } from 'react-router-dom';
 import { Doughnut, Line } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend } from 'chart.js';
+import Plot from 'react-plotly.js';
+import dayjs from 'dayjs';
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
@@ -54,21 +56,12 @@ export default function Home() {
     },
   ]);
 
-  const [medsData, setMedsData] = useState({
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        backgroundColor: ['#dc2626', '#facc15', '#16a34a', '#f97316', '#3b82f6'],
-        borderWidth: 0,
-      },
-    ],
-  });
 
   const [flagged, setFlagged] = useState([]);
   const [filter, setFilter] = useState('');
   const [expanded, setExpanded] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [fraudChart, setFraudChart] = useState({ dates: [], rolling: [] });
   const kpiIcons = [FlaskConical, TrendingUp, CheckCircle];
 
   useEffect(() => {
@@ -99,33 +92,30 @@ export default function Home() {
           { ...prev[2], value: `${detection}%` },
         ]);
 
-        const medCounts = {};
-        data.forEach((r) => {
-          const name = r.DESCRIPTION_med;
-          if (name) {
-            medCounts[name] = (medCounts[name] || 0) + 1;
-          }
-        });
-        const topMeds = Object.entries(medCounts)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 4);
-        const labels = topMeds.map(([n]) => n);
-        const counts = topMeds.map(([, c]) => c);
-        setMedsData((prev) => ({
-          ...prev,
-          labels,
-          datasets: [
-            {
-              ...prev.datasets[0],
-              data: counts,
-              backgroundColor: prev.datasets[0].backgroundColor.slice(
-                0,
-                labels.length
-              ),
-            },
-          ],
-        }));
         setLoading(false);
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/analytics/fraud-data')
+      .then((res) => res.json())
+      .then((rows) => {
+        const daily = {};
+        rows.forEach((r) => {
+          const d = dayjs(r.timestamp).format('YYYY-MM-DD');
+          const score = Number(r.risk_score);
+          if (!daily[d]) daily[d] = [];
+          daily[d].push(score);
+        });
+        const dates = Object.keys(daily).sort();
+        const rolling = dates.map((_, i) => {
+          const win = dates.slice(Math.max(0, i - 6), i + 1);
+          const all = win.flatMap((day) => daily[day]);
+          const avg = all.reduce((a, b) => a + b, 0) / all.length;
+          return Number(avg.toFixed(2));
+        });
+        setFraudChart({ dates, rolling });
       })
       .catch((err) => console.error(err));
   }, []);
@@ -205,39 +195,28 @@ export default function Home() {
       </div>
       )}
 
-      {/* Top Medicines */}
-      <div className="bg-gray-800 p-6 rounded-lg shadow grid md:grid-cols-2 gap-6 items-center">
-        <div className="w-full max-w-sm mx-auto">
-          <Doughnut
-            data={medsData}
-            options={{
-              plugins: {
-                legend: {
-                  position: 'bottom',
-                  onClick: (_, item, legend) => {
-                    const index = item.index;
-                    const ci = legend.chart;
-                    const meta = ci.getDatasetMeta(0);
-                    meta.data[index].hidden = !meta.data[index].hidden;
-                    ci.update();
-                  },
-                },
-                tooltip: {
-                  callbacks: {
-                    label: (ctx) => {
-                      const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                      const val = ctx.raw;
-                      const pct = total ? ((val / total) * 100).toFixed(1) : 0;
-                      return `${ctx.label}: ${val} (${pct}%)`;
-                    },
-                  },
-                },
-              },
-              cutout: '60%',
-              colors: false,
-            }}
-          />
-        </div>
+      {/* Fraud Trends */}
+      <div className="bg-gray-800 p-6 rounded-lg shadow">
+        <Plot
+          data={[
+            {
+              x: fraudChart.dates,
+              y: fraudChart.rolling,
+              type: 'scatter',
+              mode: 'lines+markers',
+              line: { color: '#10b981' },
+            },
+          ]}
+          layout={{
+            autosize: true,
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: '#fff' },
+            margin: { t: 30, r: 10, l: 40, b: 40 },
+          }}
+          useResizeHandler
+          style={{ width: '100%', height: '100%' }}
+        />
       </div>
 
       {/* Flagged Prescriptions Table */}
