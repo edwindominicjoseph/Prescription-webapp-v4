@@ -61,8 +61,9 @@ export default function Home() {
   const [filter, setFilter] = useState('');
   const [expanded, setExpanded] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [chartView, setChartView] = useState('rolling');
-  const [fraudChart, setFraudChart] = useState({ dates: [], counts: [], rolling: [] });
+
+  const [fraudChart, setFraudChart] = useState({ dates: [], rolling: [] });
+
   const kpiIcons = [FlaskConical, TrendingUp, CheckCircle];
 
   useEffect(() => {
@@ -106,19 +107,20 @@ export default function Home() {
         rows.forEach((r) => {
           const d = dayjs(r.timestamp).format('YYYY-MM-DD');
           const score = Number(r.risk_score);
-          if (!daily[d]) daily[d] = { scores: [], high: 0 };
-          daily[d].scores.push(score);
-          if (score > 70) daily[d].high += 1;
+
+          if (!daily[d]) daily[d] = [];
+          daily[d].push(score);
         });
         const dates = Object.keys(daily).sort();
-        const counts = dates.map((d) => daily[d].high);
         const rolling = dates.map((_, i) => {
           const win = dates.slice(Math.max(0, i - 6), i + 1);
-          const all = win.flatMap((day) => daily[day].scores);
+          const all = win.flatMap((day) => daily[day]);
           const avg = all.reduce((a, b) => a + b, 0) / all.length;
           return Number(avg.toFixed(2));
         });
-        setFraudChart({ dates, counts, rolling });
+        setFraudChart({ dates, rolling });
+
+     
       })
       .catch((err) => console.error(err));
   }, []);
@@ -200,22 +202,10 @@ export default function Home() {
 
       {/* Fraud Trends */}
       <div className="bg-gray-800 p-6 rounded-lg shadow">
-        <div className="flex justify-end mb-2 gap-2">
-          <button
-            onClick={() => setChartView('rolling')}
-            className={`px-3 py-1 rounded text-sm ${chartView === 'rolling' ? 'bg-pink-600 text-white' : 'bg-gray-700 text-gray-300'}`}
-          >
-            Rolling Avg
-          </button>
-          <button
-            onClick={() => setChartView('count')}
-            className={`px-3 py-1 rounded text-sm ${chartView === 'count' ? 'bg-pink-600 text-white' : 'bg-gray-700 text-gray-300'}`}
-          >
-            Daily High-Risk
-          </button>
-        </div>
+
         <Plot
-          data={chartView === 'rolling' ? [
+          data={[
+
             {
               x: fraudChart.dates,
               y: fraudChart.rolling,
@@ -223,13 +213,7 @@ export default function Home() {
               mode: 'lines+markers',
               line: { color: '#10b981' },
             },
-          ] : [
-            {
-              x: fraudChart.dates,
-              y: fraudChart.counts,
-              type: 'bar',
-              marker: { color: '#f97316' },
-            },
+
           ]}
           layout={{
             autosize: true,
