@@ -28,3 +28,14 @@ def top_providers():
         {"Provider_med": row["ORGANIZATION"], "count": int(row["count"])}
         for _, row in counts.iterrows()
     ]
+
+
+@analytics_router.get("/fraud-data")
+def fraud_data():
+    """Return timestamp and risk_score for all predictions."""
+    if not PRED_FILE.is_file():
+        return []
+    df = pd.read_csv(PRED_FILE, usecols=["timestamp", "risk_score"]).dropna()
+    df["risk_score"] = pd.to_numeric(df["risk_score"], errors="coerce")
+    df = df.dropna(subset=["risk_score"])
+    return df.to_dict(orient="records")
