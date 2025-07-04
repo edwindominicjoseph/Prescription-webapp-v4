@@ -61,7 +61,9 @@ export default function Home() {
   const [filter, setFilter] = useState('');
   const [expanded, setExpanded] = useState(null);
   const [loading, setLoading] = useState(true);
+
   const [fraudChart, setFraudChart] = useState({ dates: [], rolling: [] });
+
   const kpiIcons = [FlaskConical, TrendingUp, CheckCircle];
 
   useEffect(() => {
@@ -105,6 +107,7 @@ export default function Home() {
         rows.forEach((r) => {
           const d = dayjs(r.timestamp).format('YYYY-MM-DD');
           const score = Number(r.risk_score);
+
           if (!daily[d]) daily[d] = [];
           daily[d].push(score);
         });
@@ -116,6 +119,8 @@ export default function Home() {
           return Number(avg.toFixed(2));
         });
         setFraudChart({ dates, rolling });
+
+     
       })
       .catch((err) => console.error(err));
   }, []);
@@ -197,8 +202,10 @@ export default function Home() {
 
       {/* Fraud Trends */}
       <div className="bg-gray-800 p-6 rounded-lg shadow">
+
         <Plot
           data={[
+
             {
               x: fraudChart.dates,
               y: fraudChart.rolling,
@@ -206,6 +213,7 @@ export default function Home() {
               mode: 'lines+markers',
               line: { color: '#10b981' },
             },
+
           ]}
           layout={{
             autosize: true,
