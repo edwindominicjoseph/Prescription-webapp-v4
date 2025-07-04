@@ -11,7 +11,7 @@ import {
   Legend,
 } from 'chart.js';
 import FraudInsightsPanel from '../components/FraudInsightsPanel';
-import RiskTrendChart from '../components/RiskTrendChart';
+import RealTimeRiskPlot from '../components/RealTimeRiskPlot';
 import FlaggedTable from '../components/FlaggedTable';
 import MiniFraudFeed from '../components/MiniFraudFeed';
 
@@ -30,20 +30,6 @@ export default function Dashboard() {
   const [fraudPct, setFraudPct] = useState(0);
   const [fraudCount, setFraudCount] = useState(0);
   const [total, setTotal] = useState(0);
-  const [trendChart, setTrendChart] = useState({
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        borderColor: '#dc2626',
-        backgroundColor: 'rgba(220,38,38,0.2)',
-        tension: 0.4,
-        fill: true,
-        pointRadius: 0,
-      },
-    ],
-  });
-  const [lastUpdated, setLastUpdated] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [selectedRow, setSelectedRow] = useState(null);
@@ -113,25 +99,6 @@ export default function Dashboard() {
 
 
 
-        const sortedRows = [...data]
-          .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
-          .slice(-20);
-        setTrendChart((prev) => ({
-          ...prev,
-          labels: sortedRows.map((r) =>
-            new Date(r.timestamp).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            })
-          ),
-          datasets: [
-            {
-              ...prev.datasets[0],
-              data: sortedRows.map((r) => Number(r.risk_score)),
-            },
-          ],
-        }));
-        setLastUpdated(new Date().toLocaleString());
       })
       .catch((err) => console.error(err));
   }, []);
@@ -209,12 +176,7 @@ export default function Dashboard() {
           <FraudInsightsPanel />
 
           {/* Risk Trend */}
-          <div className="bg-gray-800 p-4 rounded-lg">
-            <h3 className="font-semibold mb-4" style={{ color: '#2F5597' }}>
-              Real Time Risk Score Trend
-            </h3>
-            <RiskTrendChart data={trendChart} lastUpdated={lastUpdated} />
-          </div>
+          <RealTimeRiskPlot />
         </div>
 
         {/* Right Panel */}
