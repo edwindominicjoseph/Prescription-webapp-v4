@@ -138,7 +138,7 @@ def predict_fraud(input: FraudInput):
 
     match = df3[df3["PATIENT_med"] == entry["PATIENT_ID"]]
     if not match.empty:
-        latest = match.sort_values("DISPENSE_DATE", ascending=False).iloc[0]
+        latest = match.sort_values("DATE", ascending=False).iloc[0]
         entry["UNIQUE_DOCTOR_COUNT"] = latest.get("UNIQUE_DOCTOR_COUNT", 1)
         entry["TIME_SINCE_LAST"] = latest.get("TIME_SINCE_LAST", 0)
         entry["HIGH_RISK_COUNT"] = latest.get("HIGH_RISK_COUNT", 0)
@@ -170,10 +170,10 @@ def predict_fraud(input: FraudInput):
 
     return jsonable_encoder({
         "fraud": bool(score < 0),
-        "risk_score": norm_score,
+        "risk_score": int(norm_score),
         "medication_risk": risk_category,
         "used_model": model_type,
-        "HIGH_RISK_COUNT": entry["HIGH_RISK_COUNT"],
-        "UNIQUE_DOCTOR_COUNT": entry["UNIQUE_DOCTOR_COUNT"],
-        "TIME_SINCE_LAST": entry["TIME_SINCE_LAST"]
+        "HIGH_RISK_COUNT": int(entry["HIGH_RISK_COUNT"]),
+        "UNIQUE_DOCTOR_COUNT": int(entry["UNIQUE_DOCTOR_COUNT"]),
+        "TIME_SINCE_LAST": int(entry["TIME_SINCE_LAST"])
     })
