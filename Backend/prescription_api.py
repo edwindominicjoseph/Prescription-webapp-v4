@@ -24,12 +24,13 @@ def get_prescription(rx_id: str):
             raise HTTPException(status_code=404, detail="Prescription not found")
         row = reader[idx]
 
-    # Basic example fields; extend as needed
+    # Gather relevant details for the prescription
     details = {
         "id": rx_id,
         "patient": row.get("PATIENT_med"),
         "doctor": row.get("PROVIDER"),
-        "notes": "Follow up in 2 weeks.",
-        "doctor_comments": row.get("flags") or "No comments",
+        "medication": row.get("DESCRIPTION_med"),
+        # Combine any doctor provided notes or comments under one field
+        "notes": row.get("flags") or "No notes",
     }
     return details
