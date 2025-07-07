@@ -138,7 +138,10 @@ def predict_fraud(input: FraudInput):
 
     match = df3[df3["PATIENT_med"] == entry["PATIENT_ID"]]
     if not match.empty:
-        latest = match.sort_values("DISPENSE_DATE", ascending=False).iloc[0]
+        # The dataset uses the column "DATE" to record the most recent
+        # dispensing event. Older versions used "DISPENSE_DATE", which can
+        # lead to a KeyError when sorting. Use the available column instead.
+        latest = match.sort_values("DATE", ascending=False).iloc[0]
         entry["UNIQUE_DOCTOR_COUNT"] = latest.get("UNIQUE_DOCTOR_COUNT", 1)
         entry["TIME_SINCE_LAST"] = latest.get("TIME_SINCE_LAST", 0)
         entry["HIGH_RISK_COUNT"] = latest.get("HIGH_RISK_COUNT", 0)
