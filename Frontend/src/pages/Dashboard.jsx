@@ -14,7 +14,6 @@ import FraudInsightsPanel from '../components/FraudInsightsPanel';
 import RiskTrendChart from '../components/RiskTrendChart';
 import FlaggedTable from '../components/FlaggedTable';
 import MiniFraudFeed from '../components/MiniFraudFeed';
-import FlagActivitySparkline from '../components/FlagActivitySparkline';
 
 ChartJS.register(
   ArcElement,
@@ -235,12 +234,6 @@ export default function Dashboard() {
             Recent Flagged Medicines
           </h3>
           <MiniFraudFeed />
-          <div>
-            <h4 className="text-sm mb-1" style={{ color: '#2F5597' }}>
-              Flag Activity (Last Hour)
-            </h4>
-            <FlagActivitySparkline />
-          </div>
         </div>
       </div>
       <button
