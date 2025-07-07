@@ -173,10 +173,10 @@ def predict_fraud(input: FraudInput):
 
     return jsonable_encoder({
         "fraud": bool(score < 0),
-        "risk_score": norm_score,
+        "risk_score": int(norm_score),
         "medication_risk": risk_category,
         "used_model": model_type,
-        "HIGH_RISK_COUNT": entry["HIGH_RISK_COUNT"],
-        "UNIQUE_DOCTOR_COUNT": entry["UNIQUE_DOCTOR_COUNT"],
-        "TIME_SINCE_LAST": entry["TIME_SINCE_LAST"]
+        "HIGH_RISK_COUNT": int(entry["HIGH_RISK_COUNT"]),
+        "UNIQUE_DOCTOR_COUNT": int(entry["UNIQUE_DOCTOR_COUNT"]),
+        "TIME_SINCE_LAST": int(entry["TIME_SINCE_LAST"])
     })
