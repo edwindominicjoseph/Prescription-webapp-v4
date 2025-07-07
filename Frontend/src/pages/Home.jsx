@@ -9,51 +9,15 @@ import {
   Search,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Doughnut, Line } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend } from 'chart.js';
 import Plot from 'react-plotly.js';
 import dayjs from 'dayjs';
-
-ChartJS.register(ArcElement, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
+import RadialProgress from '../components/RadialProgress';
 
 export default function Home() {
   const [kpis, setKpis] = useState([
-    {
-      label: 'Monthly Fraud Cases',
-      value: 0,
-      percent: 0,
-      data: {
-        labels: ['Cases', 'Other'],
-        datasets: [{ data: [0, 100], backgroundColor: ['#f472b6', '#e5e7eb'], borderWidth: 0 }],
-      },
-    },
-    {
-      label: 'Monthly Fraud Increase',
-      value: 0,
-      percent: 0,
-      data: {
-        labels: ['Increase', 'Other'],
-        datasets: [{ data: [0, 100], backgroundColor: ['#a78bfa', '#e5e7eb'], borderWidth: 0 }],
-      },
-    },
-    {
-      label: 'Fraud Detection Rate',
-      value: '0%',
-      percent: 0,
-      line: {
-        labels: ['W1', 'W2', 'W3', 'W4', 'W5'],
-        datasets: [
-          {
-            data: [0, 0, 0, 0, 0],
-            borderColor: '#34d399',
-            backgroundColor: 'rgba(52,211,153,0.2)',
-            tension: 0.4,
-            fill: true,
-            pointRadius: 0,
-          },
-        ],
-      },
-    },
+    { label: 'Monthly Fraud Cases', value: 0, percent: 0, color: '#f472b6' },
+    { label: 'Monthly Fraud Change', value: 0, percent: 0, color: '#a78bfa' },
+    { label: 'Fraud Detection Rate', value: '0%', percent: 0, color: '#34d399' },
   ]);
 
 
@@ -61,6 +25,10 @@ export default function Home() {
   const [filter, setFilter] = useState('');
   const [expanded, setExpanded] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [allData, setAllData] = useState([]);
+  const [dateRange, setDateRange] = useState('30');
+  const [medication, setMedication] = useState('All');
+  const [medOptions, setMedOptions] = useState([]);
 
   const [fraudChart, setFraudChart] = useState({ dates: [], rolling: [] });
 
@@ -70,60 +38,64 @@ export default function Home() {
     fetch('http://localhost:8000/predict/history')
       .then((res) => res.json())
       .then((data) => {
-        setFlagged(
-          data.map((r, i) => ({
-            id: `RX${String(i + 1).padStart(3, '0')}`,
-            patient: r.PATIENT_med,
-            status: r.fraud === 'True' ? 'Flagged' : 'Cleared',
-            risk: Math.min(5, Math.round(Number(r.risk_score) / 20)),
-            doctor: r.PROVIDER,
-          }))
-        );
-
-        const fraudCount = data.filter((r) => r.fraud === 'True' || r.fraud === true).length;
-        const month = new Date().getMonth();
-        const monthlyFraud = data.filter(
-          (r) => new Date(r.timestamp).getMonth() === month && (r.fraud === 'True' || r.fraud === true)
-        ).length;
-        const total = data.length;
-        const detection = total ? Math.round((fraudCount / total) * 100) : 0;
-
-        setKpis((prev) => [
-          { ...prev[0], value: fraudCount },
-          { ...prev[1], value: monthlyFraud },
-          { ...prev[2], value: `${detection}%` },
-        ]);
-
+        const list = Array.isArray(data) ? data : [];
+        setAllData(list);
+        setMedOptions(Array.from(new Set(list.map((r) => r.DESCRIPTION_med))).sort());
         setLoading(false);
       })
       .catch((err) => console.error(err));
   }, []);
 
   useEffect(() => {
-    fetch('http://localhost:8000/analytics/fraud-data')
-      .then((res) => res.json())
-      .then((rows) => {
-        const daily = {};
-        rows.forEach((r) => {
-          const d = dayjs(r.timestamp).format('YYYY-MM-DD');
-          const score = Number(r.risk_score);
+    if (!allData.length) return;
+    const filtered = allData.filter((r) => {
+      const inRange =
+        dateRange === 'all' || dayjs().diff(dayjs(r.timestamp), 'day') <= Number(dateRange);
+      const medMatch = medication === 'All' || r.DESCRIPTION_med === medication;
+      return inRange && medMatch;
+    });
 
-          if (!daily[d]) daily[d] = [];
-          daily[d].push(score);
-        });
-        const dates = Object.keys(daily).sort();
-        const rolling = dates.map((_, i) => {
-          const win = dates.slice(Math.max(0, i - 6), i + 1);
-          const all = win.flatMap((day) => daily[day]);
-          const avg = all.reduce((a, b) => a + b, 0) / all.length;
-          return Number(avg.toFixed(2));
-        });
-        setFraudChart({ dates, rolling });
+    setFlagged(
+      filtered.map((r, i) => ({
+        id: `RX${String(i + 1).padStart(3, '0')}`,
+        patient: r.PATIENT_med,
+        status: r.fraud === 'True' || r.fraud === true ? 'Flagged' : 'Cleared',
+        risk: Math.min(5, Math.round(Number(r.risk_score) / 20)),
+        doctor: r.PROVIDER,
+      }))
+    );
 
-     
-      })
-      .catch((err) => console.error(err));
-  }, []);
+    const fraud = filtered.filter((r) => r.fraud === 'True' || r.fraud === true);
+    const thisMonth = dayjs();
+    const prevMonth = dayjs().subtract(1, 'month');
+    const monthlyFraud = fraud.filter((r) => dayjs(r.timestamp).isSame(thisMonth, 'month')).length;
+    const prevFraud = fraud.filter((r) => dayjs(r.timestamp).isSame(prevMonth, 'month')).length;
+    const change = monthlyFraud - prevFraud;
+    const changePct = prevFraud ? Math.round((change / prevFraud) * 100) : 0;
+    const detection = filtered.length ? Math.round((fraud.length / filtered.length) * 100) : 0;
+
+    setKpis([
+      { label: 'Monthly Fraud Cases', value: monthlyFraud, percent: monthlyFraud, color: '#f472b6' },
+      { label: 'Monthly Fraud Change', value: change, percent: changePct, color: '#a78bfa' },
+      { label: 'Fraud Detection Rate', value: `${detection}%`, percent: detection, color: '#34d399' },
+    ]);
+
+    const daily = {};
+    filtered.forEach((r) => {
+      const d = dayjs(r.timestamp).format('YYYY-MM-DD');
+      const score = Number(r.risk_score);
+      if (!daily[d]) daily[d] = [];
+      daily[d].push(score);
+    });
+    const dates = Object.keys(daily).sort();
+    const rolling = dates.map((_, i) => {
+      const win = dates.slice(Math.max(0, i - 6), i + 1);
+      const all = win.flatMap((day) => daily[day]);
+      const avg = all.reduce((a, b) => a + b, 0) / all.length;
+      return Number(avg.toFixed(2));
+    });
+    setFraudChart({ dates, rolling });
+  }, [allData, dateRange, medication]);
 
   return (
     <div className="space-y-8">
@@ -150,8 +122,35 @@ export default function Home() {
         </div>
       </section>
       <section className="bg-gradient-to-r from-gray-900 to-black text-white rounded-lg p-6 shadow mb-8">
-        <h2 className="text-2xl font-bold">Dashboard Overview</h2>
-        <p className="text-sm text-white/80">Latest fraud prediction statistics</p>
+        <h2 className="text-2xl font-bold" style={{ color: '#2F5597' }}>Fraud Detection Overview</h2>
+        <div className="mt-4 flex flex-wrap gap-4">
+          <div>
+            <label className="block text-xs text-gray-300 mb-1">Date Range</label>
+            <select
+              value={dateRange}
+              onChange={(e) => setDateRange(e.target.value)}
+              className="bg-gray-700 p-1 rounded text-sm"
+            >
+              <option value="7">Last 7 Days</option>
+              <option value="30">Last 30 Days</option>
+              <option value="90">Last 90 Days</option>
+              <option value="all">All</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-300 mb-1">Medication Type</label>
+            <select
+              value={medication}
+              onChange={(e) => setMedication(e.target.value)}
+              className="bg-gray-700 p-1 rounded text-sm"
+            >
+              <option value="All">All</option>
+              {medOptions.map((m) => (
+                <option key={m} value={m}>{m}</option>
+              ))}
+            </select>
+          </div>
+        </div>
       </section>
 
       {/* Top KPI Cards */}
@@ -181,18 +180,8 @@ export default function Home() {
                   <ArrowUpRight className={`w-4 h-4 ${up ? '' : 'rotate-180'}`} /> {Math.abs(kpi.percent)}%
                 </p>
               </div>
-              <div className="w-20 h-20">
-                {kpi.line ? (
-                  <Line
-                    data={kpi.line}
-                    options={{ plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false, min: 0, max: 100 } } }}
-                  />
-                ) : (
-                  <Doughnut
-                    data={kpi.data}
-                    options={{ plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => `${ctx.formattedValue}` } } }, cutout: '70%' }}
-                  />
-                )}
+              <div className="w-20 h-20" title={`${kpi.percent}%`}>
+                <RadialProgress value={Number(kpi.percent)} color={kpi.color} />
               </div>
             </div>
           );
@@ -205,15 +194,19 @@ export default function Home() {
 
         <Plot
           data={[
-
             {
               x: fraudChart.dates,
               y: fraudChart.rolling,
               type: 'scatter',
               mode: 'lines+markers',
               line: { color: '#10b981' },
+              hovertext: fraudChart.rolling.map((v, i, arr) =>
+                i > 0 && i < arr.length - 1 && v === arr[i - 1] && v === arr[i + 1]
+                  ? 'No fraud events recorded'
+                  : v
+              ),
+              hoverinfo: 'text+x',
             },
-
           ]}
           layout={{
             autosize: true,
@@ -221,6 +214,7 @@ export default function Home() {
             plot_bgcolor: 'rgba(0,0,0,0)',
             font: { color: '#fff' },
             margin: { t: 30, r: 10, l: 40, b: 40 },
+            yaxis: { title: 'Avg Fraud Score' },
           }}
           useResizeHandler
           style={{ width: '100%', height: '100%' }}
