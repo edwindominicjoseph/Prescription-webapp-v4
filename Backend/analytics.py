@@ -39,3 +39,17 @@ def fraud_data():
     df["risk_score"] = pd.to_numeric(df["risk_score"], errors="coerce")
     df = df.dropna(subset=["risk_score"])
     return df.to_dict(orient="records")
+
+
+@analytics_router.get("/summary")
+def prescription_summary():
+    """Return counts of fraud, cleared, and rare prescriptions."""
+    if not PRED_FILE.is_file():
+        return {"fraud": 0, "cleared": 0, "rare": 0}
+    df = pd.read_csv(PRED_FILE, usecols=["fraud", "flags"]).fillna("")
+    fraud_mask = df["fraud"].astype(str).str.lower() == "true"
+    fraud_count = int(fraud_mask.sum())
+    rare_mask = df["flags"].str.contains("rare condition", case=False, na=False)
+    rare_count = int(rare_mask.sum())
+    cleared_count = int(len(df) - fraud_count)
+    return {"fraud": fraud_count, "cleared": cleared_count, "rare": rare_count}
