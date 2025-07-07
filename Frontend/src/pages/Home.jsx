@@ -326,10 +326,12 @@ export default function Home() {
                       ) : (
                         <>
                           <p>
-                            <strong>Notes:</strong> {details[row.id]?.notes || 'N/A'}
+                            <strong>Medication:</strong>{' '}
+                            {details[row.id]?.medication || 'N/A'}
                           </p>
                           <p>
-                            <strong>Doctor Comments:</strong> {details[row.id]?.doctor_comments || 'N/A'}
+                            <strong>Notes:</strong>{' '}
+                            {details[row.id]?.notes || 'N/A'}
                           </p>
                         </>
                       )}
