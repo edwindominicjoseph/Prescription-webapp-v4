@@ -27,8 +27,6 @@ export default function Dashboard() {
   const [fraudPct, setFraudPct] = useState(0);
   const [fraudCount, setFraudCount] = useState(0);
   const [total, setTotal] = useState(0);
-  const [outcomes, setOutcomes] = useState({ fraud: 0, cleared: 0, rare: 0 });
-  const [lastUpdated, setLastUpdated] = useState(null);
   const [medChart, setMedChart] = useState({
     labels: [],
     datasets: [
@@ -54,38 +52,31 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    const fetchHistory = () => {
-      fetch('http://localhost:8000/predict/history')
-        .then((res) => res.json())
-        .then((data) => {
-          setRows(
-            data.map((r, i) => ({
-              id: `RX${String(i + 1).padStart(3, '0')}`,
-              patient: r.PATIENT_med,
-              status: r.fraud === 'True' || r.fraud === true ? 'Flagged' : 'Cleared',
-              risk: Math.min(5, Math.round(Number(r.risk_score) / 20)),
-              doctor: r.PROVIDER,
-            }))
-          );
-          const totalRecords = data.length;
-          const fraudRecords = data.filter(
-            (d) => d.fraud === 'True' || d.fraud === true
-          ).length;
-          const rareRecords = data.filter(
-            (d) => d.medication_risk === 'High Risk' && !(d.fraud === 'True' || d.fraud === true)
-          ).length;
-          const clearedRecords = totalRecords - fraudRecords - rareRecords;
-          setOutcomes({ fraud: fraudRecords, cleared: clearedRecords, rare: rareRecords });
-          setLastUpdated(new Date());
-          setTotal(totalRecords);
-          setFraudCount(fraudRecords);
-          setFraudPct(
-            totalRecords ? Math.round((fraudRecords / totalRecords) * 100) : 0
-          );
+    fetch('http://localhost:8000/predict/history')
+      .then((res) => res.json())
+      .then((data) => {
+        setRows(
+          data.map((r, i) => ({
+            id: `RX${String(i + 1).padStart(3, '0')}`,
+            patient: r.PATIENT_med,
+            status: r.fraud === 'True' || r.fraud === true ? 'Flagged' : 'Cleared',
+            risk: Math.min(5, Math.round(Number(r.risk_score) / 20)),
+            doctor: r.PROVIDER,
+          }))
+        );
+        const totalRecords = data.length;
+        const fraudRecords = data.filter(
+          (d) => d.fraud === 'True' || d.fraud === true
+        ).length;
+        setTotal(totalRecords);
+        setFraudCount(fraudRecords);
+        setFraudPct(
+          totalRecords ? Math.round((fraudRecords / totalRecords) * 100) : 0
+        );
 
-          const medCounts = {};
-          data.forEach((d) => {
-            const med = d.DESCRIPTION_med;
+        const medCounts = {};
+        data.forEach((d) => {
+          const med = d.DESCRIPTION_med;
           if (med) {
             medCounts[med] = (medCounts[med] || 0) + 1;
           }
@@ -113,28 +104,23 @@ export default function Dashboard() {
         const sortedRows = [...data]
           .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
           .slice(-20);
-          setTrendChart((prev) => ({
-            ...prev,
-            labels: sortedRows.map((r) =>
-              new Date(r.timestamp).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-              })
-            ),
-            datasets: [
-              {
-                ...prev.datasets[0],
-                data: sortedRows.map((r) => Number(r.risk_score)),
-              },
-            ],
-          }));
-        })
-        .catch((err) => console.error(err));
-    };
-
-    fetchHistory();
-    const interval = setInterval(fetchHistory, 10000);
-    return () => clearInterval(interval);
+        setTrendChart((prev) => ({
+          ...prev,
+          labels: sortedRows.map((r) =>
+            new Date(r.timestamp).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+          ),
+          datasets: [
+            {
+              ...prev.datasets[0],
+              data: sortedRows.map((r) => Number(r.risk_score)),
+            },
+          ],
+        }));
+      })
+      .catch((err) => console.error(err));
   }, []);
 
   const donutFraudData = {
@@ -150,13 +136,9 @@ export default function Dashboard() {
     ],
   };
   const donutTotalData = {
-    labels: ['Fraud', 'Cleared', 'Rare'],
+    labels: ['Total'],
     datasets: [
-      {
-        data: [outcomes.fraud, outcomes.cleared, outcomes.rare],
-        backgroundColor: ['#dc2626', '#22c55e', '#fbbf24'],
-        borderWidth: 0,
-      },
+      { data: [100, 0], backgroundColor: ['#2dd4bf', '#e5e7eb'], borderWidth: 0 },
     ],
   };
 
@@ -195,39 +177,9 @@ export default function Dashboard() {
                 </p>
                 <p className="text-2xl font-bold">{total}</p>
               </div>
-              <div className="w-20 h-20 relative">
-                <Doughnut
-                  data={donutTotalData}
-                  options={{
-                    plugins: {
-                      legend: {
-                        display: true,
-                        position: 'bottom',
-                        labels: { color: '#ffffff' },
-                      },
-                      tooltip: {
-                        callbacks: {
-                          label: (ctx) => {
-                            const totalValue = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                            const value = ctx.parsed;
-                            const percent = totalValue ? ((value / totalValue) * 100).toFixed(1) : 0;
-                            return `${ctx.label}: ${value} (${percent}%)`;
-                          },
-                        },
-                      },
-                    },
-                    cutout: '70%',
-                  }}
-                />
-                <div className="absolute inset-0 flex items-center justify-center text-xs text-white">
-                  Total: {total}
-                </div>
+              <div className="w-20 h-20">
+                <Doughnut data={donutTotalData} options={{ plugins: { legend: { display: false } }, cutout: '70%' }} />
               </div>
-              {lastUpdated && (
-                <p className="text-gray-400 text-xs text-center w-full mt-2">
-                  Last updated: {lastUpdated.toLocaleTimeString()}
-                </p>
-              )}
             </div>
           </div>
 
