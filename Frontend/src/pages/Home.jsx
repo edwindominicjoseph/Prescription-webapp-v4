@@ -191,6 +191,9 @@ export default function Home() {
 
       {/* Fraud Trends */}
       <div className="bg-gray-800 p-6 rounded-lg shadow">
+        <h3 className="text-2xl font-semibold text-white text-center mt-6 mb-4">
+          Fraud Risk Score Trend
+        </h3>
 
         <Plot
           data={[
