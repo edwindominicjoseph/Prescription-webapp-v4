@@ -177,3 +177,24 @@ def bypass_patient(data: BypassInput):
     with open(WHITELIST_FILE, "w") as f:
         json.dump(sorted(RARE_CASE_PATIENTS), f)
     return {"message": f"{pid} added to whitelist"}
+
+
+@model_router.get("/summary")
+def get_outcome_summary():
+    """Return counts of fraud, cleared, and rare prescriptions."""
+    fraud = 0
+    cleared = 0
+    rare = 0
+    if PRED_FILE.is_file():
+        with open(PRED_FILE, newline="") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                is_fraud = str(row.get("fraud", "")).lower() == "true"
+                flags = str(row.get("flags", "")).lower()
+                if is_fraud:
+                    fraud += 1
+                else:
+                    cleared += 1
+                if "rare condition" in flags:
+                    rare += 1
+    return {"fraud": fraud, "cleared": cleared, "rare": rare}

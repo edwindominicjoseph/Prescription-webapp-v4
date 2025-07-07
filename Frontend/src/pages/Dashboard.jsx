@@ -13,6 +13,7 @@ import {
 import FraudInsightsPanel from '../components/FraudInsightsPanel';
 import RiskTrendChart from '../components/RiskTrendChart';
 import FlaggedTable from '../components/FlaggedTable';
+import OutcomeDonut from '../components/OutcomeDonut';
 
 ChartJS.register(
   ArcElement,
@@ -147,12 +148,6 @@ export default function Dashboard() {
       { data: [fraudPct, 100 - fraudPct], backgroundColor: ['#0ea5e9', '#e5e7eb'], borderWidth: 0 },
     ],
   };
-  const donutTotalData = {
-    labels: ['Total'],
-    datasets: [
-      { data: [100, 0], backgroundColor: ['#2dd4bf', '#e5e7eb'], borderWidth: 0 },
-    ],
-  };
 
   const filteredRows = useMemo(() => {
     return rows
@@ -198,9 +193,7 @@ export default function Dashboard() {
                 </p>
                 <p className="text-2xl font-bold">{total}</p>
               </div>
-              <div className="w-20 h-20">
-                <Doughnut data={donutTotalData} options={{ plugins: { legend: { display: false } }, cutout: '70%' }} />
-              </div>
+              <OutcomeDonut />
             </div>
           </div>
 
