@@ -24,6 +24,8 @@ export default function Home() {
   const [flagged, setFlagged] = useState([]);
   const [filter, setFilter] = useState('');
   const [expanded, setExpanded] = useState(null);
+  const [details, setDetails] = useState({});
+  const [detailLoading, setDetailLoading] = useState(null);
   const [loading, setLoading] = useState(true);
   const [allData, setAllData] = useState([]);
   const [dateRange, setDateRange] = useState('30');
@@ -33,6 +35,22 @@ export default function Home() {
   const [fraudChart, setFraudChart] = useState({ dates: [], rolling: [] });
 
   const kpiIcons = [FlaskConical, TrendingUp, CheckCircle];
+
+  const handleReview = (id) => {
+    if (expanded === id) {
+      setExpanded(null);
+      return;
+    }
+    setDetailLoading(id);
+    fetch(`http://localhost:8000/api/prescription/${id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setDetails((prev) => ({ ...prev, [id]: data }));
+        setExpanded(id);
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setDetailLoading(null));
+  };
 
   useEffect(() => {
     fetch('http://localhost:8000/predict/history')
@@ -262,8 +280,7 @@ export default function Home() {
               <>
                 <tr
                   key={row.id}
-                  className="border-t hover:bg-gray-700 transition-colors cursor-pointer"
-                  onClick={() => setExpanded(expanded === row.id ? null : row.id)}
+                  className="border-t hover:bg-gray-700 transition-colors"
                 >
                   <td className="py-2 font-medium">{row.id}</td>
                   <td className="py-2">{row.patient}</td>
@@ -292,14 +309,30 @@ export default function Home() {
                     <div className="flex gap-2">
                       <button className="bg-green-600 text-white px-2 py-1 rounded-md text-xs hover:bg-green-500">Resolve</button>
                       <button className="bg-red-600 text-white px-2 py-1 rounded-md text-xs hover:bg-red-500">Escalate</button>
-                      <button className="bg-gray-700 text-white px-2 py-1 rounded-md text-xs hover:bg-gray-600">Review</button>
+                      <button
+                        className="bg-gray-700 text-white px-2 py-1 rounded-md text-xs hover:bg-gray-600"
+                        onClick={() => handleReview(row.id)}
+                      >
+                        Review
+                      </button>
                     </div>
                   </td>
                 </tr>
                 {expanded === row.id && (
                   <tr className="bg-gray-700 text-gray-200">
-                    <td colSpan="7" className="p-3 text-sm">
-                      Prescription details and doctor notes for {row.patient}.
+                    <td colSpan="7" className="p-3 text-sm space-y-1">
+                      {detailLoading === row.id ? (
+                        'Loading...'
+                      ) : (
+                        <>
+                          <p>
+                            <strong>Notes:</strong> {details[row.id]?.notes || 'N/A'}
+                          </p>
+                          <p>
+                            <strong>Doctor Comments:</strong> {details[row.id]?.doctor_comments || 'N/A'}
+                          </p>
+                        </>
+                      )}
                     </td>
                   </tr>
                 )}
