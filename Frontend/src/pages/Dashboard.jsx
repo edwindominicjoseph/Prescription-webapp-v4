@@ -237,17 +237,6 @@ export default function Dashboard() {
                 />
               </div>
             </div>
-            <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-center min-h-[12rem]">
-              <div className="w-20 h-20">
-                <Doughnut
-                  data={donutMiddleData}
-                  options={{
-                    plugins: { legend: { display: false } },
-                    cutout: "70%",
-                  }}
-                />
-              </div>
-            </div>
             <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between min-h-[12rem]">
               <div>
                 <p
@@ -296,6 +285,17 @@ export default function Dashboard() {
                 <p className="text-xs text-gray-400 mt-2">
                   Last updated {summaryUpdated}
                 </p>
+              </div>
+            </div>
+            <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-center min-h-[12rem]">
+              <div className="w-20 h-20">
+                <Doughnut
+                  data={donutMiddleData}
+                  options={{
+                    plugins: { legend: { display: false } },
+                    cutout: "70%",
+                  }}
+                />
               </div>
             </div>
           </div>
