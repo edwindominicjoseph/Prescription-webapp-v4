@@ -217,7 +217,7 @@ export default function Dashboard() {
         <div className="space-y-6">
           {/* Row 1 */}
           <div className="grid sm:grid-cols-3 gap-4">
-            <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between">
+            <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between min-h-[12rem]">
               <div>
                 <p
                   className="text-sm font-semibold"
@@ -237,7 +237,7 @@ export default function Dashboard() {
                 />
               </div>
             </div>
-            <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-center">
+            <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-center min-h-[12rem]">
               <div className="w-20 h-20">
                 <Doughnut
                   data={donutMiddleData}
@@ -248,7 +248,7 @@ export default function Dashboard() {
                 />
               </div>
             </div>
-            <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between">
+            <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between min-h-[12rem]">
               <div>
                 <p
                   className="text-sm font-semibold"
@@ -258,7 +258,7 @@ export default function Dashboard() {
                 </p>
                 <p className="text-2xl font-bold">{total}</p>
               </div>
-              <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center justify-center h-full">
                 <div className="w-20 h-20 relative">
                   <Doughnut
                     data={donutTotalData}
@@ -288,12 +288,12 @@ export default function Dashboard() {
                     Total: {total}
                   </div>
                 </div>
-                <div className="text-xs mt-1 flex gap-1">
+                <div className="text-sm mt-2 flex gap-2">
                   <span className="text-red-400">● Fraud</span>
                   <span className="text-green-400">● Cleared</span>
                   <span className="text-yellow-400">● Rare</span>
                 </div>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-gray-400 mt-2">
                   Last updated {summaryUpdated}
                 </p>
               </div>
