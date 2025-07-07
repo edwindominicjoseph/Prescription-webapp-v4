@@ -8,7 +8,7 @@ ChartJS.register(ArcElement, CategoryScale, LinearScale, PointElement, LineEleme
 export default function Home() {
   const [kpis, setKpis] = useState([
     {
-      label: 'Total Fraud Cases',
+      label: 'Monthly Fraud Cases',
       value: 0,
       percent: 0,
       data: {
