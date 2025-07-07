@@ -172,8 +172,8 @@ export default function Dashboard() {
       },
     ],
   };
-  const donutMiddleData = {
-    labels: ["Risk", "Other"],
+  const donutPrescriptionData = {
+    labels: ["Fill", "Empty"],
     datasets: [
       {
         data: [fraudPct, 100 - fraudPct],
@@ -217,7 +217,7 @@ export default function Dashboard() {
         <div className="space-y-6">
           {/* Row 1 */}
           <div className="grid sm:grid-cols-3 gap-4">
-            <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between min-h-[12rem]">
+            <div className="bg-gray-800 text-white p-4 rounded-lg flex items-center justify-between min-h-[12rem]">
               <div>
                 <p
                   className="text-sm font-semibold"
@@ -237,18 +237,17 @@ export default function Dashboard() {
                 />
               </div>
             </div>
-            <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between min-h-[12rem]">
+            <div className="bg-gray-800 text-white p-4 rounded-lg flex flex-col items-center justify-center min-h-[12rem]">
               <div>
                 <p
                   className="text-sm font-semibold"
                   style={{ color: "#2F5597" }}
                 >
-                  Total Prescriptions
+                  Prescription Status
                 </p>
-                <p className="text-2xl font-bold">{total}</p>
               </div>
               <div className="flex flex-col items-center justify-center h-full">
-                <div className="w-20 h-20 relative">
+                <div className="w-20 h-20">
                   <Doughnut
                     data={donutTotalData}
                     options={{
@@ -273,9 +272,6 @@ export default function Dashboard() {
                       cutout: "70%",
                     }}
                   />
-                  <div className="absolute inset-0 flex items-center justify-center text-xs">
-                    Total: {total}
-                  </div>
                 </div>
                 <div className="text-sm mt-2 flex gap-2">
                   <span className="text-red-400">● Fraud</span>
@@ -287,10 +283,16 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-center min-h-[12rem]">
+            <div className="bg-gray-800 text-white p-4 rounded-lg flex flex-col items-center justify-center min-h-[12rem]">
+              <p
+                className="text-sm font-semibold mb-2"
+                style={{ color: "#2F5597" }}
+              >
+                Total Prescriptions
+              </p>
               <div className="w-20 h-20">
                 <Doughnut
-                  data={donutMiddleData}
+                  data={donutPrescriptionData}
                   options={{
                     plugins: { legend: { display: false } },
                     cutout: "70%",
