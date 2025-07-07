@@ -1,5 +1,3 @@
-import { useEffect, useState } from 'react';
-
 const headlines = [
   '🔔 New study shows rise in prescription fraud post-COVID.',
   '💊 FDA flags 3 new high-risk opioids for misuse.',
@@ -9,19 +7,15 @@ const headlines = [
 ];
 
 export default function NewsTicker() {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setIndex((i) => (i + 1) % headlines.length);
-    }, 4000);
-    return () => clearInterval(id);
-  }, []);
+  const text = headlines.join(' • ');
 
   return (
-    <div className="bg-gradient-to-r from-orange-500 to-yellow-400 overflow-hidden h-10 flex items-center">
-      <div key={index} className="whitespace-nowrap text-white font-medium animate-slide px-4">
-        {headlines[index]}
+    <div className="bg-gradient-to-r from-orange-500 to-yellow-400 overflow-hidden h-10 flex items-center w-full">
+      <div className="ticker whitespace-nowrap text-white font-medium px-4">
+        <span className="mx-4">{text}</span>
+        <span className="mx-4" aria-hidden="true">
+          {text}
+        </span>
       </div>
     </div>
   );
