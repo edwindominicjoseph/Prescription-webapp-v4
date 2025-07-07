@@ -231,7 +231,7 @@ export default function Dashboard() {
             onReview={(r) => setSelectedRow(r)}
           />
           <h3 className="font-semibold" style={{ color: '#2F5597' }}>
-            Recent Fraud Cases
+            Recent Flagged Medicines
           </h3>
           <MiniFraudFeed />
         </div>
