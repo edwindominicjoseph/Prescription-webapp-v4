@@ -171,7 +171,7 @@ export default function Dashboard() {
         <div className="space-y-6">
           {/* Row 1 */}
           <div className="grid sm:grid-cols-3 gap-4">
-            <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between">
+            <div className="bg-gray-800 py-3 px-4 rounded-lg flex items-center justify-between min-h-[180px]">
               <div>
                 <p className="text-sm font-semibold" style={{ color: '#2F5597' }}>
                   Total Fraud Cases
@@ -182,10 +182,10 @@ export default function Dashboard() {
                 <Doughnut data={donutFraudData} options={{ plugins: { legend: { display: false } }, cutout: '70%' }} />
               </div>
             </div>
-            <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-center">
+            <div className="bg-gray-800 py-3 px-4 rounded-lg flex flex-col justify-center items-center min-h-[180px]">
               <AvgFraudGauge />
             </div>
-            <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between">
+            <div className="bg-gray-800 py-3 px-4 rounded-lg flex items-center justify-between min-h-[180px]">
               <div>
                 <p className="text-sm font-semibold" style={{ color: '#2F5597' }}>
                   Total Prescriptions

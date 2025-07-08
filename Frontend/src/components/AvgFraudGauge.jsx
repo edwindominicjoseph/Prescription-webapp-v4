@@ -31,12 +31,12 @@ export default function AvgFraudGauge() {
 
 
   return (
-    <div className="flex flex-col items-center gap-y-2">
+    <div className="flex flex-col items-center justify-center gap-y-2">
       <p className="text-sm font-semibold" style={{ color: '#2F5597' }}>
         Avg. Fraud Risk
       </p>
 
-      <div className="relative w-40 h-40 drop-shadow-lg pt-2">
+      <div className="relative w-40 h-40 drop-shadow-lg border-b border-gray-700 pb-2">
         <ReactSpeedometer
           maxValue={5}
           value={avg}
@@ -55,11 +55,11 @@ export default function AvgFraudGauge() {
         />
       </div>
 
-      <div className="mt-4 flex flex-col items-center">
-        <span className="text-3xl font-bold text-white drop-shadow-sm">
+      <div className="text-center space-y-1 mt-1">
+        <span className="text-2xl font-bold text-white drop-shadow-sm">
           {avg.toFixed(2)}
         </span>
-        <span className="text-sm text-gray-300">out of 5</span>
+        <span className="text-xs text-gray-300">out of 5</span>
       </div>
     </div>
   );
