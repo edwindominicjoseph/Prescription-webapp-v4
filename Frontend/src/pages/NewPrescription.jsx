@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import RiskGauge from '../components/RiskGauge';
 
 export default function NewPrescription() {
   const [dispenses, setDispenses] = useState(1);
@@ -164,8 +165,9 @@ export default function NewPrescription() {
           </button>
         </div>
         {result && (
-          <div className="mt-4 p-4 bg-gray-700 rounded">
+          <div className="mt-4 p-4 bg-gray-700 rounded text-center space-y-2">
             <p className="font-medium">Risk Score: {result.risk_score}</p>
+            <RiskGauge value={Number(result.risk_score)} />
             <p>Medication Risk: {result.medication_risk}</p>
             <p>Fraudulent: {result.fraud ? 'Yes' : 'No'}</p>
           </div>
