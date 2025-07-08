@@ -36,7 +36,7 @@ export default function AvgFraudGauge() {
         Avg. Fraud Risk
       </p>
 
-      <div className="relative w-32 h-32 drop-shadow-lg pt-2">
+      <div className="relative w-40 h-40 drop-shadow-lg pt-2">
         <ReactSpeedometer
           maxValue={5}
           value={avg}
