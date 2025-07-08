@@ -14,6 +14,7 @@ import FraudInsightsPanel from '../components/FraudInsightsPanel';
 import RiskTrendChart from '../components/RiskTrendChart';
 import FlaggedTable from '../components/FlaggedTable';
 import MiniFraudFeed from '../components/MiniFraudFeed';
+import AvgFraudGauge from '../components/AvgFraudGauge';
 
 ChartJS.register(
   ArcElement,
@@ -142,12 +143,6 @@ export default function Dashboard() {
       { data: [fraudPct, 100 - fraudPct], backgroundColor: ['#dc2626', '#e5e7eb'], borderWidth: 0 },
     ],
   };
-  const donutMiddleData = {
-    labels: ['Risk', 'Other'],
-    datasets: [
-      { data: [fraudPct, 100 - fraudPct], backgroundColor: ['#0ea5e9', '#e5e7eb'], borderWidth: 0 },
-    ],
-  };
   const donutTotalData = {
     labels: ['Total'],
     datasets: [
@@ -188,9 +183,7 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-center">
-              <div className="w-20 h-20">
-                <Doughnut data={donutMiddleData} options={{ plugins: { legend: { display: false } }, cutout: '70%' }} />
-              </div>
+              <AvgFraudGauge />
             </div>
             <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between">
               <div>
