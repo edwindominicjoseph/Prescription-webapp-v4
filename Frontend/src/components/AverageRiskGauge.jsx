@@ -1,49 +1,33 @@
 import PropTypes from 'prop-types';
-import ReactSpeedometer, { CustomSegmentLabelPosition } from 'react-d3-speedometer';
-
-function mapScoreToGauge(value) {
-  if (value <= 1.5) {
-    return (value / 1.5) * 1.25;
-  }
-  if (value <= 3.5) {
-    return value - 0.25;
-  }
-  return 3.25 + ((value - 3.5) * 1.75) / 1.5;
-}
+import ReactSpeedometer from 'react-d3-speedometer';
 
 export default function AverageRiskGauge({ value }) {
-  const stops = [0, 1.25, 3.25, 5];
-  const gaugeValue = mapScoreToGauge(value);
+  const stops = [0, 1.5, 3.5, 5];
   return (
-    <div className="relative flex flex-col items-center justify-center w-full max-w-[200px] group" title="Average fraud severity across recent flagged prescriptions.">
-      <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs bg-gray-700 text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100">
-        This reflects the average fraud severity across all flagged prescriptions.
-      </div>
+    <div
+      className="relative flex flex-col items-center justify-center"
+      title="Average fraud severity across recent flagged prescriptions."
+    >
       <ReactSpeedometer
         minValue={0}
         maxValue={5}
-        value={gaugeValue}
+        value={value}
         customSegmentStops={stops}
         segmentColors={["#22c55e", "#eab308", "#ef4444"]}
         ringWidth={12}
-        fluidWidth
+        width={160}
         height={120}
         needleColor="#f3f4f6"
         needleTransition="easeQuadInOut"
-        needleTransitionDuration={300}
+        needleTransitionDuration={1000}
         currentValueText=""
         textColor="#d1d5db"
-        customSegmentLabels={[
-          { text: '0', position: CustomSegmentLabelPosition.Outside, fontSize: '11px' },
-          { text: '1.5', position: CustomSegmentLabelPosition.Outside, fontSize: '11px' },
-          { text: '3.5', position: CustomSegmentLabelPosition.Outside, fontSize: '11px' },
-          { text: '5', position: CustomSegmentLabelPosition.Outside, fontSize: '11px' },
-        ]}
-        labelFontSize="11px"
+        maxSegmentLabels={6}
+        labelFontSize="10px"
       />
-      <div className="absolute inset-0 flex flex-col items-center justify-end pb-2 pointer-events-none">
-        <p className="text-white text-2xl font-semibold mt-2">{value.toFixed(2)}</p>
-        <p className="text-slate-400 text-sm">out of 5</p>
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+        <div className="text-xl font-semibold text-white">{value.toFixed(2)}</div>
+        <div className="text-sm text-slate-400">out of 5</div>
       </div>
     </div>
   );
