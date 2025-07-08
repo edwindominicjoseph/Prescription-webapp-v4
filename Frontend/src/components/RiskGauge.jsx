@@ -3,12 +3,12 @@ import ReactSpeedometer from 'react-d3-speedometer';
 
 export default function RiskGauge({ value }) {
   const maxValue = 100;
-  const segments = 3;
   const customSegmentLabels = [
     { text: 'Low', position: 'INSIDE', color: '#22c55e' },
     { text: 'Medium', position: 'INSIDE', color: '#eab308' },
     { text: 'High', position: 'INSIDE', color: '#ef4444' },
   ];
+  const segments = customSegmentLabels.length;
 
   return (
     <ReactSpeedometer
@@ -21,6 +21,7 @@ export default function RiskGauge({ value }) {
       needleTransitionDuration={1000}
       needleColor="#374151"
       textColor="#ffffff"
+      forceRender
     />
   );
 }

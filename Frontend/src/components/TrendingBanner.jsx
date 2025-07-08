@@ -9,7 +9,7 @@ export default function TrendingBanner() {
     <div className="bg-gradient-to-r from-pink-500 to-yellow-500 overflow-hidden">
       <div className="whitespace-nowrap flex animate-marquee py-2">
         {items.concat(items).map((item, idx) => (
-          <span key={idx} className="text-white font-bold mx-4">
+          <span key={`${item}-${idx}`} className="text-white font-bold mx-4">
             {item}
           </span>
         ))}
