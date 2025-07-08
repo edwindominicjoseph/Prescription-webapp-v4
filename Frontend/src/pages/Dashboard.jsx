@@ -14,6 +14,7 @@ import FraudInsightsPanel from '../components/FraudInsightsPanel';
 import RiskTrendChart from '../components/RiskTrendChart';
 import FlaggedTable from '../components/FlaggedTable';
 import MiniFraudFeed from '../components/MiniFraudFeed';
+import SummaryCards from '../components/SummaryCards';
 
 ChartJS.register(
   ArcElement,
@@ -172,6 +173,7 @@ export default function Dashboard() {
       >
         AI-Powered Prescription Fraud Detection Dashboard
       </h1>
+      <SummaryCards />
       <div className="md:grid md:grid-cols-[55%_45%] gap-6">
         <div className="space-y-6">
           {/* Row 1 */}
