@@ -112,10 +112,18 @@ export default function Dashboard() {
           setFraudCount(fraudRecords);
           setFraudPct(totalRecords ? Math.round((fraudRecords / totalRecords) * 100) : 0);
 
-          const avg =
-            data.reduce((sum, r) => sum + Number(r.risk_score || 0), 0) /
-            (totalRecords || 1);
-          setAvgRisk(Number((avg / 20).toFixed(2)));
+          fetch('http://localhost:8000/prediction-history')
+            .then(res => res.json())
+            .then(hist => {
+              const avgScore = Number(hist.avg_fraud_score || 0);
+              setAvgRisk(Number((avgScore * 5).toFixed(2)));
+            })
+            .catch(() => {
+              const avg =
+                data.reduce((sum, r) => sum + Number(r.risk_score || 0), 0) /
+                (totalRecords || 1);
+              setAvgRisk(Number((avg / 20).toFixed(2)));
+            });
 
           const sortedRows = [...data]
             .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
@@ -191,9 +199,7 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="bg-gray-800 p-4 rounded-lg flex flex-col items-center justify-center text-center">
-              <p className="text-md font-medium text-slate-300 text-center mb-1">
-                Avg. Fraud Risk
-              </p>
+              <h3 className="text-md font-medium text-slate-300 text-center mb-1">Avg. Fraud Risk</h3>
               <AverageRiskGauge value={avgRisk} />
             </div>
             <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between">
