@@ -280,9 +280,8 @@ export default function Home() {
                   .includes(filter.toLowerCase())
               )
               .map((row) => (
-              <>
+              <React.Fragment key={row.id}>
                 <tr
-                  key={row.id}
                   className="border-t hover:bg-gray-700 transition-colors"
                 >
                   <td className="py-2 font-medium">{row.id}</td>
@@ -341,7 +340,7 @@ export default function Home() {
                     </td>
                   </tr>
                 )}
-              </>
+              </React.Fragment>
             ))}
           </tbody>
         </table>

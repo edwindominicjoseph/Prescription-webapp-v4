@@ -34,10 +34,9 @@ export default function AverageRiskGauge({ value }) {
         currentValueText=""
         textColor="#d1d5db"
         customSegmentLabels={[
-          { text: '0', position: CustomSegmentLabelPosition.Outside, fontSize: '11px' },
-          { text: '1.5', position: CustomSegmentLabelPosition.Outside, fontSize: '11px' },
-          { text: '3.5', position: CustomSegmentLabelPosition.Outside, fontSize: '11px' },
-          { text: '5', position: CustomSegmentLabelPosition.Outside, fontSize: '11px' },
+          { text: 'Low', position: CustomSegmentLabelPosition.Outside, fontSize: '11px' },
+          { text: 'Medium', position: CustomSegmentLabelPosition.Outside, fontSize: '11px' },
+          { text: 'High', position: CustomSegmentLabelPosition.Outside, fontSize: '11px' },
         ]}
         labelFontSize="11px"
       />
