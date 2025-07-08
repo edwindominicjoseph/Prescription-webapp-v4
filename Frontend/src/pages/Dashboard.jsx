@@ -87,60 +87,62 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetch('http://localhost:8000/predict/history')
-      .then((res) => res.json())
-      .then((data) => {
-        setRows(
-          data.map((r, i) => ({
-            id: `RX${String(i + 1).padStart(3, '0')}`,
-            patient: r.PATIENT_med,
-            status: r.fraud === 'True' || r.fraud === true ? 'Flagged' : 'Cleared',
-            risk: Math.min(5, Math.round(Number(r.risk_score) / 20)),
-            doctor: r.PROVIDER,
-            medication: r.DESCRIPTION_med,
-            rare: Array.isArray(r.flags)
-              ? r.flags.includes('Patient is exempted due to a known rare condition')
-              : r.flags?.includes('rare condition'),
-          }))
-        );
-        const totalRecords = data.length;
-        const fraudRecords = data.filter(
-          (d) => d.fraud === 'True' || d.fraud === true
-        ).length;
-        setTotal(totalRecords);
-        setFraudCount(fraudRecords);
-        setFraudPct(
-          totalRecords ? Math.round((fraudRecords / totalRecords) * 100) : 0
-        );
+    const fetchData = () => {
+      fetch('http://localhost:8000/predict/history')
+        .then(res => res.json())
+        .then(data => {
+          setRows(
+            data.map((r, i) => ({
+              id: `RX${String(i + 1).padStart(3, '0')}`,
+              patient: r.PATIENT_med,
+              status: r.fraud === 'True' || r.fraud === true ? 'Flagged' : 'Cleared',
+              risk: Math.min(5, Math.round(Number(r.risk_score) / 20)),
+              doctor: r.PROVIDER,
+              medication: r.DESCRIPTION_med,
+              rare: Array.isArray(r.flags)
+                ? r.flags.includes('Patient is exempted due to a known rare condition')
+                : r.flags?.includes('rare condition'),
+            }))
+          );
+          const totalRecords = data.length;
+          const fraudRecords = data.filter(
+            d => d.fraud === 'True' || d.fraud === true
+          ).length;
+          setTotal(totalRecords);
+          setFraudCount(fraudRecords);
+          setFraudPct(totalRecords ? Math.round((fraudRecords / totalRecords) * 100) : 0);
 
-        const avg =
-          data.reduce((sum, r) => sum + Number(r.risk_score || 0), 0) /
-          (totalRecords || 1);
-        setAvgRisk(Number((avg / 20).toFixed(2)));
+          const avg =
+            data.reduce((sum, r) => sum + Number(r.risk_score || 0), 0) /
+            (totalRecords || 1);
+          setAvgRisk(Number((avg / 20).toFixed(2)));
 
+          const sortedRows = [...data]
+            .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+            .slice(-20);
+          setTrendChart(prev => ({
+            ...prev,
+            labels: sortedRows.map(r =>
+              new Date(r.timestamp).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })
+            ),
+            datasets: [
+              {
+                ...prev.datasets[0],
+                data: sortedRows.map(r => Number(r.risk_score)),
+              },
+            ],
+          }));
+          setLastUpdated(new Date().toLocaleString());
+        })
+        .catch(err => console.error(err));
+    };
 
-
-        const sortedRows = [...data]
-          .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
-          .slice(-20);
-        setTrendChart((prev) => ({
-          ...prev,
-          labels: sortedRows.map((r) =>
-            new Date(r.timestamp).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            })
-          ),
-          datasets: [
-            {
-              ...prev.datasets[0],
-              data: sortedRows.map((r) => Number(r.risk_score)),
-            },
-          ],
-        }));
-        setLastUpdated(new Date().toLocaleString());
-      })
-      .catch((err) => console.error(err));
+    fetchData();
+    const id = setInterval(fetchData, 10000);
+    return () => clearInterval(id);
   }, []);
 
   const donutFraudData = {
@@ -189,11 +191,10 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="bg-gray-800 p-4 rounded-lg flex flex-col items-center justify-center text-center">
-              <p className="text-sm font-semibold mb-1" style={{ color: '#2F5597' }}>
+              <p className="text-md font-medium text-slate-300 text-center mb-1">
                 Avg. Fraud Risk
               </p>
               <AverageRiskGauge value={avgRisk} />
-              <p className="text-xs mt-1 text-gray-300">{avgRisk.toFixed(1)} / 5</p>
             </div>
             <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between">
               <div>
