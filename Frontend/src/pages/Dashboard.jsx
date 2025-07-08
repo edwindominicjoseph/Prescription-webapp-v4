@@ -14,6 +14,7 @@ import FraudInsightsPanel from '../components/FraudInsightsPanel';
 import RiskTrendChart from '../components/RiskTrendChart';
 import FlaggedTable from '../components/FlaggedTable';
 import MiniFraudFeed from '../components/MiniFraudFeed';
+import AverageRiskGauge from '../components/AverageRiskGauge';
 
 ChartJS.register(
   ArcElement,
@@ -30,6 +31,7 @@ export default function Dashboard() {
   const [fraudPct, setFraudPct] = useState(0);
   const [fraudCount, setFraudCount] = useState(0);
   const [total, setTotal] = useState(0);
+  const [avgRisk, setAvgRisk] = useState(0);
   const [trendChart, setTrendChart] = useState({
     labels: [],
     datasets: [
@@ -111,6 +113,11 @@ export default function Dashboard() {
           totalRecords ? Math.round((fraudRecords / totalRecords) * 100) : 0
         );
 
+        const avg =
+          data.reduce((sum, r) => sum + Number(r.risk_score || 0), 0) /
+          (totalRecords || 1);
+        setAvgRisk(Number((avg / 20).toFixed(2)));
+
 
 
         const sortedRows = [...data]
@@ -140,12 +147,6 @@ export default function Dashboard() {
     labels: ['Fraud', 'Other'],
     datasets: [
       { data: [fraudPct, 100 - fraudPct], backgroundColor: ['#dc2626', '#e5e7eb'], borderWidth: 0 },
-    ],
-  };
-  const donutMiddleData = {
-    labels: ['Risk', 'Other'],
-    datasets: [
-      { data: [fraudPct, 100 - fraudPct], backgroundColor: ['#0ea5e9', '#e5e7eb'], borderWidth: 0 },
     ],
   };
   const donutTotalData = {
@@ -187,10 +188,12 @@ export default function Dashboard() {
                 <Doughnut data={donutFraudData} options={{ plugins: { legend: { display: false } }, cutout: '70%' }} />
               </div>
             </div>
-            <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-center">
-              <div className="w-20 h-20">
-                <Doughnut data={donutMiddleData} options={{ plugins: { legend: { display: false } }, cutout: '70%' }} />
-              </div>
+            <div className="bg-gray-800 p-4 rounded-lg flex flex-col items-center justify-center text-center">
+              <p className="text-sm font-semibold mb-1" style={{ color: '#2F5597' }}>
+                Avg. Fraud Risk
+              </p>
+              <AverageRiskGauge value={avgRisk} />
+              <p className="text-xs mt-1 text-gray-300">{avgRisk.toFixed(1)} / 5</p>
             </div>
             <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between">
               <div>
