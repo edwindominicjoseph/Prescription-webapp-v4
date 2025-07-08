@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+
 import ReactSpeedometer, { CustomSegmentLabelPosition } from 'react-d3-speedometer';
+
 
 export default function AvgFraudGauge() {
   const [avg, setAvg] = useState(0);
@@ -18,6 +20,7 @@ export default function AvgFraudGauge() {
       .catch(err => console.error(err));
   }, []);
 
+
   const segments = [0, 1.5, 3.5, 5];
   const colors = ['#00e396', '#feb019', '#ff4560'];
   const labels = [
@@ -26,11 +29,13 @@ export default function AvgFraudGauge() {
     { text: 'High', position: CustomSegmentLabelPosition.Inside, color: '#ff4560' },
   ];
 
+
   return (
     <div className="flex flex-col items-center">
       <p className="text-sm font-semibold mb-1" style={{ color: '#2F5597' }}>
         Avg. Fraud Risk
       </p>
+
       <div className="relative w-full max-w-[200px] drop-shadow-lg">
         <ReactSpeedometer
           maxValue={5}
@@ -53,6 +58,8 @@ export default function AvgFraudGauge() {
           <span className="text-xs text-gray-300">out of 5</span>
         </div>
       </div>
+
+
     </div>
   );
 }
