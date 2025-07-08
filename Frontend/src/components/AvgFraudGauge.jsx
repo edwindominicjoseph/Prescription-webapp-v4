@@ -36,7 +36,7 @@ export default function AvgFraudGauge() {
         Avg. Fraud Risk
       </p>
 
-      <div className="relative w-full max-w-[200px] drop-shadow-lg">
+      <div className="relative w-40 h-40 drop-shadow-lg">
         <ReactSpeedometer
           maxValue={5}
           value={avg}
@@ -51,7 +51,7 @@ export default function AvgFraudGauge() {
           ringWidth={20}
           textColor="#ffffff"
           valueTextFontSize="0px"
-          fluidWidth
+          width={160}
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
           <span className="text-lg font-bold text-white drop-shadow-sm">{avg.toFixed(2)}</span>
