@@ -170,29 +170,29 @@ export default function Dashboard() {
       <div className="md:grid md:grid-cols-[55%_45%] gap-6">
         <div className="space-y-6">
           {/* Row 1 */}
-          <div className="grid sm:grid-cols-3 gap-3">
-            <div className="bg-gray-800 p-3 rounded-lg flex items-center justify-between shadow-md ring-1 ring-gray-700">
+          <div className="grid sm:grid-cols-3 gap-4">
+            <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold" style={{ color: '#2F5597' }}>
                   Total Fraud Cases
                 </p>
                 <p className="text-2xl font-bold text-red-500">{fraudCount}</p>
               </div>
-              <div className="w-16 h-16">
+              <div className="w-20 h-20">
                 <Doughnut data={donutFraudData} options={{ plugins: { legend: { display: false } }, cutout: '70%' }} />
               </div>
             </div>
-            <div className="bg-gray-800 p-3 rounded-lg flex items-center justify-center shadow-md ring-1 ring-gray-700">
+            <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-center">
               <AvgFraudGauge />
             </div>
-            <div className="bg-gray-800 p-3 rounded-lg flex items-center justify-between shadow-md ring-1 ring-gray-700">
+            <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold" style={{ color: '#2F5597' }}>
                   Total Prescriptions
                 </p>
                 <p className="text-2xl font-bold">{total}</p>
               </div>
-              <div className="w-16 h-16">
+              <div className="w-20 h-20">
                 <Doughnut data={donutTotalData} options={{ plugins: { legend: { display: false } }, cutout: '70%' }} />
               </div>
             </div>
