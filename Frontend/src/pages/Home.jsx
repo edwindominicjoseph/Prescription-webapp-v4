@@ -125,8 +125,8 @@ export default function Home() {
 
       {/* Top KPI Cards */}
       <div className="grid gap-6 md:grid-cols-3">
-        {kpis.map((kpi) => (
-          <div key={kpi.label} className="bg-gray-800 p-4 rounded-lg shadow flex items-center justify-between transition-transform hover:scale-105">
+        {kpis.map((kpi, idx) => (
+          <div key={`${kpi.label}-${idx}`} className="bg-gray-800 p-4 rounded-lg shadow flex items-center justify-between transition-transform hover:scale-105">
             <div>
               <p className="text-sm text-gray-400">{kpi.label}</p>
               <p className="text-2xl font-semibold text-white">{kpi.value}</p>
@@ -152,7 +152,7 @@ export default function Home() {
         </div>
         <ul className="space-y-2 text-sm">
           {medsData.labels.map((label, idx) => (
-            <li key={label} className="flex items-center gap-2">
+            <li key={`${label}-${idx}`} className="flex items-center gap-2">
               <span className="inline-block w-3 h-3 rounded-sm" style={{ backgroundColor: medsData.datasets[0].backgroundColor[idx] }}></span>
               {label}
             </li>
@@ -186,7 +186,7 @@ export default function Home() {
                 </td>
                 <td className="py-2">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className={`w-4 h-4 inline ${i < row.risk ? 'text-yellow-400' : 'text-gray-300'}`} />
+                    <Star key={`${row.id}-${i}`} className={`w-4 h-4 inline ${i < row.risk ? 'text-yellow-400' : 'text-gray-300'}`} />
                   ))}
                 </td>
                 <td className="py-2">
