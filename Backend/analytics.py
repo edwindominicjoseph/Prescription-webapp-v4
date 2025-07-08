@@ -43,9 +43,9 @@ def summary_data():
     presc_daily = (
         recent.groupby("date").size().reset_index(name="count").sort_values("date")
     )
+    fraud_recent = fraud_df[fraud_df["timestamp"] >= one_week_ago]
     alerts_daily = (
-        recent.loc[fraud_df.index]
-        .groupby("date")
+        fraud_recent.groupby("date")
         .size()
         .reset_index(name="count")
         .sort_values("date")
