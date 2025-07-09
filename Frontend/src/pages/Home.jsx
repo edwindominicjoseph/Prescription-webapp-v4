@@ -21,15 +21,15 @@ export default function Home() {
   ]);
 
 
-  const [filteredPrescriptions, setFilteredPrescriptions] = useState([]);
+  const [flagged, setFlagged] = useState([]);
   const [filter, setFilter] = useState('');
   const [expanded, setExpanded] = useState(null);
   const [details, setDetails] = useState({});
   const [detailLoading, setDetailLoading] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [allPrescriptions, setAllPrescriptions] = useState([]);
+  const [allData, setAllData] = useState([]);
   const [dateRange, setDateRange] = useState('30');
-  const [selectedMedication, setSelectedMedication] = useState('All');
+  const [medication, setMedication] = useState('All');
   const [medOptions, setMedOptions] = useState([]);
 
   const [fraudChart, setFraudChart] = useState({ dates: [], rolling: [] });
@@ -57,7 +57,7 @@ export default function Home() {
       .then((res) => res.json())
       .then((data) => {
         const list = Array.isArray(data) ? data : [];
-        setAllPrescriptions(list);
+        setAllData(list);
         setMedOptions(Array.from(new Set(list.map((r) => r.DESCRIPTION_med))).sort());
         setLoading(false);
       })
@@ -65,13 +65,16 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (!allPrescriptions.length) return;
-    const meds =
-      selectedMedication === 'All'
-        ? allPrescriptions
-        : allPrescriptions.filter((r) => r.DESCRIPTION_med === selectedMedication);
-    setFilteredPrescriptions(
-      meds.map((r, i) => ({
+    if (!allData.length) return;
+    const filtered = allData.filter((r) => {
+      const inRange =
+        dateRange === 'all' || dayjs().diff(dayjs(r.timestamp), 'day') <= Number(dateRange);
+      const medMatch = medication === 'All' || r.DESCRIPTION_med === medication;
+      return inRange && medMatch;
+    });
+
+    setFlagged(
+      filtered.map((r, i) => ({
         id: `RX${String(i + 1).padStart(3, '0')}`,
         patient: r.PATIENT_med,
         status: r.fraud === 'True' || r.fraud === true ? 'Flagged' : 'Cleared',
@@ -79,18 +82,6 @@ export default function Home() {
         doctor: r.PROVIDER,
       }))
     );
-  }, [allPrescriptions, selectedMedication]);
-
-  useEffect(() => {
-    if (!allPrescriptions.length) return;
-    const filtered = allPrescriptions.filter((r) => {
-      const inRange =
-        dateRange === 'all' || dayjs().diff(dayjs(r.timestamp), 'day') <= Number(dateRange);
-      const medMatch = selectedMedication === 'All' || r.DESCRIPTION_med === selectedMedication;
-      return inRange && medMatch;
-    });
-
-    // update summary metrics based on the filtered records
 
     const fraud = filtered.filter((r) => r.fraud === 'True' || r.fraud === true);
     const thisMonth = dayjs();
@@ -122,7 +113,7 @@ export default function Home() {
       return Number(avg.toFixed(2));
     });
     setFraudChart({ dates, rolling });
-  }, [allPrescriptions, dateRange, selectedMedication]);
+  }, [allData, dateRange, medication]);
 
   return (
     <div className="space-y-8">
@@ -167,8 +158,8 @@ export default function Home() {
           <div>
             <label className="block text-xs text-gray-300 mb-1">Medication Type</label>
             <select
-              value={selectedMedication}
-              onChange={(e) => setSelectedMedication(e.target.value)}
+              value={medication}
+              onChange={(e) => setMedication(e.target.value)}
               className="bg-gray-700 p-1 rounded text-sm"
             >
               <option value="All">All</option>
@@ -281,7 +272,7 @@ export default function Home() {
             </tr>
           </thead>
           <tbody>
-            {filteredPrescriptions
+            {flagged
               .filter((r) =>
                 [r.id, r.patient, r.doctor]
                   .join(' ')
